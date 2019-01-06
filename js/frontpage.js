@@ -1065,6 +1065,21 @@ function moveAnimals() {
   });
 }
 
+/*-------------------------
+live update
+-------------------------*/
+function checkNotification() {
+  db.collection("notifications").onSnapshot(snapshot => {
+    let changes = snapshot.docChanges();
+    changes.forEach(change => {
+      if (change.type == "added") {
+        console.log("changes");
+        newsBtn.classList.add("flash");
+      }
+    });
+  });
+}
+
 ///////////// not used yet  ////////////////
 /*-------------------------------------------
 Upload an image to database

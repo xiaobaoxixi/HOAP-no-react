@@ -97,6 +97,12 @@ label {
     justify-self: end; }
     .navbar #sidebarBtns #newsBtn {
       margin-right: 10px; }
+      .navbar #sidebarBtns #newsBtn.flash {
+        animation: flash 1.5s ease-in 3; }
+
+@keyframes flash {
+  50% {
+    opacity: 0.1; } }
     .navbar #sidebarBtns #newsBtn,
     .navbar #sidebarBtns #settingBtn {
       cursor: pointer; }
