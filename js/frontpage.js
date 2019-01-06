@@ -3,12 +3,8 @@
 /*-----------------------------------------
 Elements for HTML 
 ----------------------------------------*/
-const frontpageContent = document.querySelector("#frontpageContent");
-const signedInContent = document.querySelector("#signedInContent");
-const memberBtns = document.querySelector("#sidebarBtns");
 const signoutAdminBtn = document.querySelector("#signoutAdmin");
 const signOutButton = document.querySelector("#signOut");
-const footer = document.querySelector("#footer");
 
 const animalListOnLoggedIn = document.querySelector("#animalList");
 const eachAnimalTemp = document.querySelector("#eachAnimalTemp").content;
@@ -31,6 +27,9 @@ const frontpageContentS = document.querySelectorAll(".frontpageContent");
 const userContentS = document.querySelectorAll(".userContent");
 const adminContentS = document.querySelectorAll(".adminContent");
 const closeByDefaultContents = document.querySelectorAll(".closeByDefault");
+/////////////////////////////
+let alreadyMemberBtn = document.querySelector("#alreadyMemberBtn");
+let loginForm = document.querySelector("#loginForm");
 
 /*-------------------------------------------
 Initialize Firebase
@@ -61,15 +60,30 @@ Start
 window.addEventListener("DOMContentLoaded", init);
 
 function init() {
-  newsFeedPanel.innerHTML = "";
+  // listen to user actions
+  const settingBtn = document.querySelector("#settingBtn");
+  const newsBtn = document.querySelector("#newsBtn");
+  const userSettings = document.querySelector("#userSettings");
+  const newsFeed = document.querySelector("#newsFeed");
+  settingBtn.addEventListener("click", () => {
+    toggleElements(userSettings, newsFeed);
+  });
+  newsBtn.addEventListener("click", () => {
+    toggleElements(newsFeed, userSettings);
+  });
+  alreadyMemberBtn.addEventListener("click", e => {
+    e.preventDefault();
+    toggleElements(loginForm);
+  });
   signinButton.addEventListener("click", signinUser);
   signupBtn.addEventListener("click", signupUser);
-  alreadyMemberBtn.addEventListener("click", openSigninForm);
+
+  newsFeedPanel.innerHTML = "";
   signoutAdminBtn.addEventListener("click", signout);
   signOutButton.addEventListener("click", signout);
 
   /*-------------------------------------------
-Display right content if user
+Display right content based on if user is logged in and if user is admin
 ------------------------------------------*/
 
   // check if a user session already exist, if yes, show content that matches this user
@@ -83,39 +97,36 @@ Display right content if user
   // detect user state change and display different content based on what type of user is logged in
   firebase.auth().onAuthStateChanged(function(user) {
     if (user && user.email === "admin@admin.com") {
+      // display relevant content when admin is logged in
+      hideArrayElements(frontpageContentS);
+      hideArrayElements(userContentS);
+      showArrayElements(adminContentS);
+      // get relevant user data
       displayAnimals();
-      adminSection.style.display = "block";
+      // adminSection.style.display = "block";
       // frontpageContent.style.display = "none";
       // signedInContent.style.display = "none";
       // signinForm.style.display = "none";
       // alreadyMemberBtn.style.display = "none";
       // memberBtns.style.display = "none";
-      signoutAdminBtn.style.display = "block";
+      // signoutAdminBtn.style.display = "block";
       //      footer.style.display = "none";
     } else if (user) {
+      // display relevant content for logged in user
       hideArrayElements(frontpageContentS);
       hideArrayElements(adminContentS);
       hideArrayElements(closeByDefaultContents);
       showArrayElements(userContentS);
+      // get relevant user data
       getUserAnimals(user.email);
       getUserSetting(user.email);
       getUserNotifications(user.email);
       getUserDonationSofar(user.email);
-      const settingBtn = document.querySelector("#settingBtn");
-      const newsBtn = document.querySelector("#newsBtn");
-      const userSettings = document.querySelector("#userSettings");
-      const newsFeed = document.querySelector("#newsFeed");
-      settingBtn.addEventListener("click", () => {
-        toggleElememnts(userSettings, newsFeed);
-      });
-      newsBtn.addEventListener("click", () => {
-        toggleElememnts(newsFeed, userSettings);
-      });
     } else {
+      // display relevant content when no user is logged in
       hideArrayElements(adminContentS);
       hideArrayElements(userContentS);
       showArrayElements(frontpageContentS);
-      showElement(footer);
     }
   });
 
@@ -204,20 +215,6 @@ adminPostBtn.addEventListener("click", e => {
   });
   adminPostInput.value = "";
 });
-/*-------------------------------------------
-Display signin form
-------------------------------------------*/
-
-let alreadyMemberBtn = document.querySelector("#alreadyMemberBtn");
-let signinForm = document.querySelector("#loginForm");
-
-function openSigninForm() {
-  if (signinForm.style.display == "block") {
-    signinForm.style.display = "none";
-  } else {
-    signinForm.style.display = "block";
-  }
-}
 
 /*------------------------------------------
 sign in user
@@ -236,6 +233,7 @@ function signinUser(e) {
     .auth()
     .signInWithEmailAndPassword(signinEmail.value, signinPassword.value)
     .then(() => {
+      toggleElements(loginForm);
       // keep current user in browser session so that the user is kept with page reload
       window.sessionStorage.setItem("userEmail", signinEmail.value);
       const currentUserEmail = window.sessionStorage.getItem("userEmail");
@@ -289,6 +287,7 @@ function signout() {
     .then(function() {
       console.log("Succesfull logout");
       window.sessionStorage.removeItem("userEmail");
+      toggleElements(userSettings);
     })
     .catch(function(error) {
       // An error happened.
@@ -1003,8 +1002,8 @@ function showArrayElements(array) {
   });
 }
 
-function toggleElememnts(showEle, hideEle) {
-  if (hideEle.classList.contains("shownContent")) {
+function toggleElements(showEle, hideEle) {
+  if (hideEle && hideEle.classList.contains("shownContent")) {
     hideEle.classList.remove("shownContent");
   }
   showEle.classList.toggle("shownContent");
