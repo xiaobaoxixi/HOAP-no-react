@@ -747,16 +747,16 @@ function getUserAnimals(userEmail) {
     .then(res => {
       res.forEach(entry => {
         if (entry.data().seeCat && entry.data().seeDog === false) {
-          showCats(userEmail);
+          getCats(userEmail);
         } else if (entry.data().seeDog && entry.data().seeCat === false) {
-          showDogs(userEmail);
+          getDogs(userEmail);
         } else {
-          showAllAnimals(userEmail);
+          getAllAnimals(userEmail);
         }
       });
     });
 }
-function showCats(userEmail) {
+function getCats(userEmail) {
   db.collection("animals")
     .where("type", "==", "cat")
     .get()
@@ -764,7 +764,7 @@ function showCats(userEmail) {
       appendEachAnimal(res, userEmail);
     });
 }
-function showDogs(userEmail) {
+function getDogs(userEmail) {
   console.log("show dog");
 
   db.collection("animals")
@@ -774,7 +774,7 @@ function showDogs(userEmail) {
       appendEachAnimal(res, userEmail);
     });
 }
-function showAllAnimals(userEmail) {
+function getAllAnimals(userEmail) {
   db.collection("animals")
     .get()
     .then(res => {
@@ -782,214 +782,18 @@ function showAllAnimals(userEmail) {
     });
 }
 
-function appendEachAnimal(array, userEmail) {
-  animalListOnLoggedIn.innerHTML = "";
-  array.forEach(entry => {
-    const data = entry.data();
-    let animalDiv = document.createElement("div");
-    animalDiv.classList.add("eachAnimal");
-    animalDiv.dataset.id = entry.id;
-    let animalName = document.createElement("p");
-    animalName.textContent = data.name;
-    let animalArrow = document.createElement("div");
-    animalArrow.classList.add("triangleUp");
-    let animalImg = document.createElement("img");
-    animalImg.setAttribute("src", entry.data().file);
-    // due to Firebase storage quota limit, we decided to not to use images stored in Firebase
-    ////////////////////////////////////////////////////////////
-    // if (data.file !== undefined && data.file !== "") {
-    //   let fileName = data.file;
-    //   let animalImgRef = storageReference.child(`admin/${fileName}`);
-    //   animalImgRef
-    //     .getDownloadURL()
-    //     .then(function(url) {
-    //       console.log(url);
-    //       animalImg.setAttribute("src", url);
-    //     })
-    //     .catch(function(error) {
-    //       console.log("DB error: " + error);
-    //       animalImg.setAttribute("src", "img/animals/default.png");
-    //     });
-    // } else {
-    //   animalImg.setAttribute("src", "img/animals/newcomer.png");
-    // }
-    ////////////////////////////////////////////////////////////
-    let heart = document.createElement("img");
-    heart.classList.add("heart");
-    // check if user follows this animal
-    db.collection("member")
-      .where("email", "==", userEmail)
-      .get()
-      .then(res => {
-        res.forEach(user => {
-          if (user.data().following.indexOf(entry.id) > -1) {
-            heart.setAttribute("src", "img/icons/filledheart.png");
-            heart.setAttribute("alt", "filled heart icon");
-          } else {
-            heart.setAttribute("src", "img/icons/emptyheart.png");
-            heart.setAttribute("alt", "empty heart icon");
-          }
-        });
-      });
-    let statusCircle = document.createElement("div");
-    statusCircle.classList.add("statusCircle");
-    animalDiv.appendChild(animalName);
-    animalDiv.appendChild(animalImg);
-    animalDiv.appendChild(heart);
-    animalDiv.appendChild(statusCircle);
-    animalDiv.appendChild(animalArrow);
-    animalDiv.addEventListener("click", e => {
-      // hide side panel if present
-      hideElement(userSettingPanel);
-      hideElement(newsFeedPanel);
-      // show animal modal with triangle pointer
-      let arrows = e.target.parentElement.querySelectorAll(".triangleUp");
-      hideArrayElements(arrows);
-      e.target.querySelector(".triangleUp").style.display = "inherit";
-      showAnimalModal(entry.id);
-    });
-    animalListOnLoggedIn.appendChild(animalDiv);
-  });
-  moveAnimals();
-}
-
-function showAnimalModal(animalId) {
+function getClickedAnimal(animalId) {
   db.collection("animals")
     .doc(animalId)
     .get()
     .then(res => {
       petExpand.style.display = "grid";
-      cloneAnimalInfo(res.data(), animalId);
+      showClickedAnimalModal(res.data(), animalId);
     });
 }
 
-/*----------------------------------
-general display functions, reusable
------------------------------------*/
-
-function hideArrayElements(array) {
-  array.forEach(removeElement => {
-    removeElement.style.display = "none";
-  });
-}
-
-function showArrayElements(array) {
-  array.forEach(removeElement => {
-    removeElement.style.display = "block";
-  });
-}
-
-function showElement(ele) {
-  ele.classList.add("shownContent");
-}
-
-function hideElement(ele) {
-  ele.classList.remove("shownContent");
-}
-
-function toggleElements(showEle, hideEle) {
-  if (hideEle && hideEle.classList.contains("shownContent")) {
-    hideEle.classList.remove("shownContent");
-  }
-  showEle.classList.toggle("shownContent");
-}
-
-function resetForm(form) {
-  const allFormELements = form.querySelectorAll("*");
-  allFormELements.forEach(e => {
-    e.value = "";
-    if (e.checked) {
-      e.checked = false;
-    }
-  });
-}
-
-function clearContent(ele) {
-  const contentS = ele.querySelectorAll("span");
-  contentS.forEach(c => {
-    c.textContent = "";
-  });
-}
-
-function syncNrWithRange(form, element) {
-  const donationNr = form.querySelector(".donationNr");
-  element.textContent = preferenceForm.monthlyDonation.value;
-  form.querySelector('input[type="range"').addEventListener("change", e => {
-    element.textContent = e.target.value;
-  });
-}
-
-function showFeedback(form, error, color) {
-  form.querySelector(".feedbackMsg").textContent = error;
-  form.querySelector(".feedbackMsg").style.color = color;
-}
-
-/*-------------------------
-specific display functions
--------------------------*/
-
-// Click left/right arrow to browse through animals
-function moveAnimals() {
-  const leftKey = document.querySelector("#animalArrowLeft");
-  const rightKey = document.querySelector("#animalArrowRight");
-
-  leftKey.addEventListener("click", () => {
-    const last = document.querySelector("#animalList").lastElementChild;
-    const first = document.querySelector("#animalList").firstElementChild;
-
-    last.remove();
-    document.querySelector("#animalList").insertBefore(last, first);
-  });
-
-  rightKey.addEventListener("click", () => {
-    const first = document.querySelector("#animalList").firstElementChild;
-
-    first.remove();
-    document.querySelector("#animalList").appendChild(first);
-  });
-}
-
-/*-------------------------------------------
-Upload an image to database
-------------------------------------------*/
-
-//get elements
-const uploader = document.querySelector("#uploader");
-const fileButton = document.querySelector("#fileButton");
-
-//listen for file selection
-
-fileButton.addEventListener("change", function(e) {
-  //get file
-  let file = e.target.files[0];
-
-  // document.querySelector('input[type="file"]').value.split(/(\\|\/)/g).pop();
-  //https://forums.asp.net/t/2027451.aspx?How%20to%20get%20file%20name%20selected%20in%20input%20type%20file%20&fbclid=IwAR1q1NmUJszE3bNt4Pn9tbY068Q9x4A2Ar2sWA39Tep5CUrpY2FdiTh5DA8
-
-  //create a storage ret
-  let storageRef = firebase.storage().ref("member/" + file.name);
-
-  //upload file
-  let task = storageRef.put(file);
-
-  // update progress bar
-  task.on(
-    "state_changed",
-    function progress(snapshot) {
-      let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    },
-    function error(err) {},
-    function complete() {
-      console.log("picture is uploaded");
-    }
-  );
-});
-
-/*--------------------------------------
-Add data to expand & open expands
--------------------------------------*/
-
-function cloneAnimalInfo(data, animalID) {
+// show animal modal including getting relevant info from db
+function showClickedAnimalModal(data, animalID) {
   const src = document
     .querySelector(`.eachAnimal[data-id="${animalID}"] img`)
     .getAttribute("src");
@@ -1092,7 +896,6 @@ function cloneAnimalInfo(data, animalID) {
       memberDonate(donationSubmitForm);
     }
   }
-
   petExpand.appendChild(clone);
   petExpand.appendChild(donationClone);
   const closeExpandBtn = document.querySelector(".closeExpandBtn");
@@ -1104,3 +907,197 @@ function cloneAnimalInfo(data, animalID) {
     hideArrayElements(triangleUp);
   });
 }
+
+/*----------------------------------
+general display functions, reusable
+-----------------------------------*/
+
+function hideArrayElements(array) {
+  array.forEach(removeElement => {
+    removeElement.style.display = "none";
+  });
+}
+
+function showArrayElements(array) {
+  array.forEach(removeElement => {
+    removeElement.style.display = "block";
+  });
+}
+
+function showElement(ele) {
+  ele.classList.add("shownContent");
+}
+
+function hideElement(ele) {
+  ele.classList.remove("shownContent");
+}
+
+function toggleElements(showEle, hideEle) {
+  if (hideEle && hideEle.classList.contains("shownContent")) {
+    hideEle.classList.remove("shownContent");
+  }
+  showEle.classList.toggle("shownContent");
+}
+
+function resetForm(form) {
+  const allFormELements = form.querySelectorAll("*");
+  allFormELements.forEach(e => {
+    e.value = "";
+    if (e.checked) {
+      e.checked = false;
+    }
+  });
+}
+
+function clearContent(ele) {
+  const contentS = ele.querySelectorAll("span");
+  contentS.forEach(c => {
+    c.textContent = "";
+  });
+}
+
+function syncNrWithRange(form, element) {
+  const donationNr = form.querySelector(".donationNr");
+  element.textContent = preferenceForm.monthlyDonation.value;
+  form.querySelector('input[type="range"').addEventListener("change", e => {
+    element.textContent = e.target.value;
+  });
+}
+
+function showFeedback(form, error, color) {
+  form.querySelector(".feedbackMsg").textContent = error;
+  form.querySelector(".feedbackMsg").style.color = color;
+}
+
+function appendEachAnimal(array, userEmail) {
+  animalListOnLoggedIn.innerHTML = "";
+  array.forEach(entry => {
+    const data = entry.data();
+    let animalDiv = document.createElement("div");
+    animalDiv.classList.add("eachAnimal");
+    animalDiv.dataset.id = entry.id;
+    let animalName = document.createElement("p");
+    animalName.textContent = data.name;
+    let animalArrow = document.createElement("div");
+    animalArrow.classList.add("triangleUp");
+    let animalImg = document.createElement("img");
+    animalImg.setAttribute("src", entry.data().file);
+    // due to Firebase storage quota limit, we decided to not to use images stored in Firebase
+    ////////////////////////////////////////////////////////////
+    // if (data.file !== undefined && data.file !== "") {
+    //   let fileName = data.file;
+    //   let animalImgRef = storageReference.child(`admin/${fileName}`);
+    //   animalImgRef
+    //     .getDownloadURL()
+    //     .then(function(url) {
+    //       console.log(url);
+    //       animalImg.setAttribute("src", url);
+    //     })
+    //     .catch(function(error) {
+    //       console.log("DB error: " + error);
+    //       animalImg.setAttribute("src", "img/animals/default.png");
+    //     });
+    // } else {
+    //   animalImg.setAttribute("src", "img/animals/newcomer.png");
+    // }
+    ////////////////////////////////////////////////////////////
+    let heart = document.createElement("img");
+    heart.classList.add("heart");
+    // check if user follows this animal
+    db.collection("member")
+      .where("email", "==", userEmail)
+      .get()
+      .then(res => {
+        res.forEach(user => {
+          if (user.data().following.indexOf(entry.id) > -1) {
+            heart.setAttribute("src", "img/icons/filledheart.png");
+            heart.setAttribute("alt", "filled heart icon");
+          } else {
+            heart.setAttribute("src", "img/icons/emptyheart.png");
+            heart.setAttribute("alt", "empty heart icon");
+          }
+        });
+      });
+    let statusCircle = document.createElement("div");
+    statusCircle.classList.add("statusCircle");
+    animalDiv.appendChild(animalName);
+    animalDiv.appendChild(animalImg);
+    animalDiv.appendChild(heart);
+    animalDiv.appendChild(statusCircle);
+    animalDiv.appendChild(animalArrow);
+    animalDiv.addEventListener("click", e => {
+      // hide side panel if present
+      hideElement(userSettingPanel);
+      hideElement(newsFeedPanel);
+      // show animal modal with triangle pointer
+      let arrows = e.target.parentElement.querySelectorAll(".triangleUp");
+      hideArrayElements(arrows);
+      e.target.querySelector(".triangleUp").style.display = "inherit";
+      getClickedAnimal(entry.id);
+    });
+    animalListOnLoggedIn.appendChild(animalDiv);
+  });
+  moveAnimals();
+}
+
+/*-------------------------
+specific display functions
+-------------------------*/
+
+// Click left/right arrow to browse through animals
+function moveAnimals() {
+  const leftKey = document.querySelector("#animalArrowLeft");
+  const rightKey = document.querySelector("#animalArrowRight");
+
+  leftKey.addEventListener("click", () => {
+    const last = document.querySelector("#animalList").lastElementChild;
+    const first = document.querySelector("#animalList").firstElementChild;
+
+    last.remove();
+    document.querySelector("#animalList").insertBefore(last, first);
+  });
+
+  rightKey.addEventListener("click", () => {
+    const first = document.querySelector("#animalList").firstElementChild;
+
+    first.remove();
+    document.querySelector("#animalList").appendChild(first);
+  });
+}
+
+///////////// not used yet  ////////////////
+/*-------------------------------------------
+Upload an image to database
+------------------------------------------*/
+
+//get elements
+const uploader = document.querySelector("#uploader");
+const fileButton = document.querySelector("#fileButton");
+
+//listen for file selection
+
+fileButton.addEventListener("change", function(e) {
+  //get file
+  let file = e.target.files[0];
+
+  // document.querySelector('input[type="file"]').value.split(/(\\|\/)/g).pop();
+  //https://forums.asp.net/t/2027451.aspx?How%20to%20get%20file%20name%20selected%20in%20input%20type%20file%20&fbclid=IwAR1q1NmUJszE3bNt4Pn9tbY068Q9x4A2Ar2sWA39Tep5CUrpY2FdiTh5DA8
+
+  //create a storage ret
+  let storageRef = firebase.storage().ref("member/" + file.name);
+
+  //upload file
+  let task = storageRef.put(file);
+
+  // update progress bar
+  task.on(
+    "state_changed",
+    function progress(snapshot) {
+      let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    },
+    function error(err) {},
+    function complete() {
+      console.log("picture is uploaded");
+    }
+  );
+});
