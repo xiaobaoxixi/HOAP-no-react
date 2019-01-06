@@ -31,6 +31,7 @@ let alreadyMemberBtn = document.querySelector("#alreadyMemberBtn");
 let loginForm = document.querySelector("#loginForm");
 const signoutAdminBtn = document.querySelector("#signoutAdmin");
 const signOutButton = document.querySelector("#signOut");
+const stuffDonationForm = document.querySelector("#stuffDonationForm form");
 
 /*-------------------------------------------
 Initialize Firebase
@@ -57,14 +58,12 @@ let storageReference = storage.ref();
 /*-------------------------------------------
 Start
 ------------------------------------------*/
-
 window.addEventListener("DOMContentLoaded", init);
-
 function init() {
   // Display right content based on if user is logged in and if user is admin
   pickContent();
   // listen to user actions
-  listenToUser();
+  addStaticListeners();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,17 +96,16 @@ function pickContent() {
   if (window.sessionStorage.getItem("userEmail")) {
     const currentUserEmail = window.sessionStorage.getItem("userEmail");
     getUserSetting(currentUserEmail);
-    getUserNotifications(currentUserEmail);
+    getUserNewsfeed(currentUserEmail);
     getUserDonationSofar(currentUserEmail);
     getUserAnimals(currentUserEmail);
   }
 }
 
-function listenToUser() {
+function addStaticListeners() {
   // user interaction on logged-in page
   const settingBtn = document.querySelector("#settingBtn");
   const newsBtn = document.querySelector("#newsBtn");
-  const donationStatus = document.querySelector("#donationStatus");
   settingBtn.addEventListener("click", () => {
     getUserDonationSofar(window.sessionStorage.getItem("userEmail"));
     toggleElements(userSettingPanel, newsFeedPanel);
@@ -115,11 +113,16 @@ function listenToUser() {
   newsBtn.addEventListener("click", () => {
     toggleElements(newsFeedPanel, userSettingPanel);
   });
+  cancelMembershipBtn.addEventListener("click", cancelMembership);
+  messageForm.addEventListener("submit", sendMessage);
+  stuffDonationForm.addEventListener("submit", stuffDonate);
+
+  // user interaction on frontpage
   alreadyMemberBtn.addEventListener("click", e => {
     e.preventDefault();
     toggleElements(loginForm);
   });
-  // user interaction on frontpage
+
   const signinEmail = document.querySelector("#signinEmail");
   const signinPassword = document.querySelector("#signinPassword");
   const signinButton = document.querySelector("#signinButton");
@@ -132,7 +135,25 @@ function listenToUser() {
   signupBtn.addEventListener("click", signupUser);
   signoutAdminBtn.addEventListener("click", signout);
   signOutButton.addEventListener("click", signout);
+
+  oneTimeDonationForm.addEventListener("submit", onetimeDonation);
+  subscribeForm.addEventListener("submit", subscribe);
 }
+
+function startUserSession(email) {
+  window.sessionStorage.setItem("userEmail", email);
+  newsFeedPanel.innerHTML = "";
+  resetForm(userSettingForm);
+  clearContent(donationStatus);
+  getUserSetting(email);
+  getUserDonationSofar(email);
+  getUserNewsfeed(email);
+  getUserAnimals(email);
+}
+
+/*------------------------------------------
+functions related to Firebase authentication
+-------------------------------------------*/
 
 function signinUser(e) {
   e.preventDefault();
@@ -167,17 +188,6 @@ function signupUser(e) {
     });
 }
 
-function startUserSession(email) {
-  window.sessionStorage.setItem("userEmail", email);
-  newsFeedPanel.innerHTML = "";
-  resetForm(userSettingForm);
-  clearContent(donationStatus);
-  getUserSetting(email);
-  getUserDonationSofar(email);
-  getUserNotifications(email);
-  getUserAnimals(email);
-}
-
 function signout() {
   firebase
     .auth()
@@ -193,78 +203,82 @@ function signout() {
     });
 }
 
-/*--------------------------------------
-Add data to expand & open expands
--------------------------------------*/
-
-function cloneAnimalInfo(data, animalID) {
-  const src = document
-    .querySelector(`.eachAnimal[data-id="${animalID}"] img`)
-    .getAttribute("src");
-  petExpand.innerHTML = "";
-  const clone = detailedAnimalTemp.cloneNode(true);
-  clone.querySelector(".bigAnimalImage img").setAttribute("src", src);
-  clone.querySelector(".animalName").textContent = data.name;
-  clone.querySelector(".animalBreed").textContent = data.breed;
-  clone.querySelector(".animalAge").textContent = data.age;
-  clone.querySelector(".animalGender").textContent = data.gender;
-  clone.querySelector(".animalSize").textContent = data.size;
-  if (!data.young) {
-    clone.querySelector(".animalPup").style.display = "none";
-  }
-  if (!data.pregnant) {
-    clone.querySelector(".animalPregnant").style.display = "none";
-  }
-  clone.querySelector(".animalStory").textContent = data.story;
-  clone.querySelector(".money").textContent = data.money;
-  clone.querySelector(".name").textContent = data.name;
-  // append the donation section of this animal
-  let donationClone = donationTemp.cloneNode(true);
-  donationClone.querySelector("form").setAttribute("data-id", animalID);
-  const donationForm = donationClone.querySelector("form");
-  const morning = donationClone.querySelector("label.morning");
-  const afternoon = donationClone.querySelector("label.afternoon");
-  const evening = donationClone.querySelector("label.evening");
-  const training = donationClone.querySelector("label.training");
-  // need to read db to get needed time slots
-  db.collection("dailyTaskTemplate")
-    .where("animalID", "==", animalID)
-    .get()
-    .then(res => {
-      res.forEach(entry => {
-        if (entry.data().morning === false) {
-          morning.classList.add("crossout");
-          morning.querySelector("input").setAttribute("disabled", "disabled");
-        }
-        if (entry.data().afternoon === false) {
-          afternoon.classList.add("crossout");
-          afternoon.querySelector("input").setAttribute("disabled", "disabled");
-        }
-        if (entry.data().evening === false) {
-          evening.classList.add("crossout");
-          evening.querySelector("input").setAttribute("disabled", "disabled");
-        }
-        if (entry.data().training === false) {
-          training.classList.add("crossout");
-          training.querySelector("input").setAttribute("disabled", "disabled");
-        }
-      });
-    });
-  donationForm.addEventListener("submit", donate);
-
-  petExpand.appendChild(clone);
-  petExpand.appendChild(donationClone);
-  const closeExpandBtn = document.querySelector(".closeExpandBtn");
-
-  const triangleUp = document.querySelectorAll(".triangleUp");
-
-  closeExpandBtn.addEventListener("click", () => {
-    petExpand.style.display = "none";
-    hideArrayElements(triangleUp);
+function preferenceSetting(email) {
+  // sync donation value text when user adjust range bar
+  syncNrWithRange(preferenceForm, preferenceForm.querySelector(".donationNr"));
+  // submit form in 2 ways
+  const submitPrefBtn = document.querySelector("#submitPrefBtn");
+  const skipPrefBtn = document.querySelector("#skipPrefBtn");
+  preferenceForm.addEventListener("submit", sendPreferenceToDatabase);
+  skipPrefBtn.addEventListener("click", () => {
+    sendPreferenceToDatabase();
+    hideElement(prefModal);
   });
 }
+/*-----------------------------------------------------------
+functions that write(POST,UPDATE,DELETE) to Firebase database
+------------------------------------------------------------*/
 
-function donate(e) {
+function sendPreferenceToDatabase(e) {
+  if (e) {
+    e.preventDefault();
+  }
+  // get current user email
+  let email = window.sessionStorage.getItem("userEmail");
+  // get values from preference form
+  const nickname = preferenceForm.nickname.value;
+  const catBol = preferenceForm.cat.checked ? true : false;
+  const dogBol = preferenceForm.dog.checked ? true : false;
+  const maleBol = preferenceForm.male.checked ? true : false;
+  const femaleBol = preferenceForm.female.checked ? true : false;
+  const smallBol = preferenceForm.small.checked ? true : false;
+  const mediumBol = preferenceForm.medium.checked ? true : false;
+  const largeBol = preferenceForm.large.checked ? true : false;
+  const pupBol = preferenceForm.pup.checked ? true : false;
+  const pregnantBol = preferenceForm.pregnant.checked ? true : false;
+  const errandBol = preferenceForm.errand.checked ? true : false;
+  const newcomingBol = preferenceForm.newComming.checked ? true : false;
+  const monthlyDonation = preferenceForm.monthlyDonation.value;
+
+  // add user to db with the values
+  db.collection("member")
+    .add({
+      email: email,
+      nickname: nickname,
+      permission: "none",
+      seeCat: catBol,
+      seeDog: dogBol,
+      seeMale: maleBol,
+      seeFemale: femaleBol,
+      seeSmall: smallBol,
+      seeMedium: mediumBol,
+      seeLarge: largeBol,
+      seePup: pupBol,
+      seePregnant: pregnantBol,
+      notifyErrand: errandBol,
+      notifyNewcoming: newcomingBol,
+      monthlyDonation: monthlyDonation,
+      following: []
+    })
+    .then(() => {
+      startUserSession(email);
+      // window.sessionStorage.setItem("userEmail", email);
+      // resetForm(userSettingForm);
+      // clearContent(donationStatus);
+      // getUserSetting(email);
+      // getUserDonationSofar(email);
+      // getUserNotifications(email);
+      // getUserAnimals(email);
+    });
+  // hide modal without waiting for db success
+  hideElement(prefModal);
+}
+
+// function updatePreferenceToDatabase() {
+//   console.log("update user preferences");
+// }
+
+function memberDonate(e) {
   e.preventDefault();
   const donationSubmitForm = document.querySelector("#donationFormLogginIn");
   const animalID = donationSubmitForm.dataset.id;
@@ -374,77 +388,6 @@ function donate(e) {
   }
 }
 
-/*************************************
- * user interaction
- *************************************/
-cancelMembershipBtn.addEventListener("click", cancelMembership);
-messageForm.addEventListener("submit", sendMessage);
-oneTimeDonationForm.addEventListener("submit", onetimeDonation);
-subscribeForm.addEventListener("submit", subscribe);
-
-/*************************************
- * functions that write(POST,UPDATE,DELETE) to database
- *************************************/
-
-function sendPreferenceToDatabase(e) {
-  if (e) {
-    e.preventDefault();
-  }
-  // get current user email
-  let email = window.sessionStorage.getItem("userEmail");
-  // get values from preference form
-  const nickname = preferenceForm.nickname.value;
-  const catBol = preferenceForm.cat.checked ? true : false;
-  const dogBol = preferenceForm.dog.checked ? true : false;
-  const maleBol = preferenceForm.male.checked ? true : false;
-  const femaleBol = preferenceForm.female.checked ? true : false;
-  const smallBol = preferenceForm.small.checked ? true : false;
-  const mediumBol = preferenceForm.medium.checked ? true : false;
-  const largeBol = preferenceForm.large.checked ? true : false;
-  const pupBol = preferenceForm.pup.checked ? true : false;
-  const pregnantBol = preferenceForm.pregnant.checked ? true : false;
-  const errandBol = preferenceForm.errand.checked ? true : false;
-  const newcomingBol = preferenceForm.newComming.checked ? true : false;
-  const monthlyDonation = preferenceForm.monthlyDonation.value;
-
-  // add user to db with the values
-  db.collection("member")
-    .add({
-      email: email,
-      nickname: nickname,
-      permission: "none",
-      seeCat: catBol,
-      seeDog: dogBol,
-      seeMale: maleBol,
-      seeFemale: femaleBol,
-      seeSmall: smallBol,
-      seeMedium: mediumBol,
-      seeLarge: largeBol,
-      seePup: pupBol,
-      seePregnant: pregnantBol,
-      notifyErrand: errandBol,
-      notifyNewcoming: newcomingBol,
-      monthlyDonation: monthlyDonation,
-      following: []
-    })
-    .then(() => {
-      startUserSession(email);
-      // window.sessionStorage.setItem("userEmail", email);
-      // resetForm(userSettingForm);
-      // clearContent(donationStatus);
-      // getUserSetting(email);
-      // getUserDonationSofar(email);
-      // getUserNotifications(email);
-      // getUserAnimals(email);
-    });
-  // hide modal without waiting for db success
-  hideElement(prefModal);
-}
-
-function updatePreferenceToDatabase() {
-  console.log("update user preferences");
-}
-
 function cancelMembership() {
   var currentUser = firebase.auth().currentUser;
   currentUser
@@ -477,13 +420,15 @@ function sendMessage(e) {
         type: "user",
         writer: user
       })
-      .then(console.log("message sent"));
+      .then(() => {
+        resetForm(messageForm);
+        console.log("message sent");
+      });
   }
 }
 
 function onetimeDonation(e) {
   e.preventDefault();
-  console.log("one time donation");
   const stuff = oneTimeDonationForm.donateWhat.value;
   const postNr = oneTimeDonationForm.postNr.value;
   const pickup = oneTimeDonationForm.pickup.checked;
@@ -491,19 +436,33 @@ function onetimeDonation(e) {
   const inWhoseName = oneTimeDonationForm.inWhoseName.value;
   // if user choose pick up, then this entry shows up in errands
   if (stuff !== "" && pickup === true && postNr !== "") {
-    db.collection("stuffDonation").add({
-      stuff: stuff,
-      postNr: postNr
-    });
-    const errandsDesc = `Pick up a ${stuff} from ${postNr}`;
-    db.collection("notifications").add({
-      text: errandsDesc,
-      type: "errands"
-    });
+    db.collection("stuffDonation")
+      .add({
+        stuff: stuff,
+        postNr: postNr
+      })
+      .then(() => {
+        resetForm(donationForm);
+        console.log(
+          "Thank you for your donation, we will contact you to arrange pickup."
+        );
+        const errandsDesc = `Pick up a ${stuff} from ${postNr}`;
+        db.collection("notifications").add({
+          text: errandsDesc,
+          type: "errands"
+        });
+      });
   } else if (stuff !== "" && pickup === false) {
-    db.collection("stuffDonation").add({
-      stuff: stuff
-    });
+    db.collection("stuffDonation")
+      .add({
+        stuff: stuff
+      })
+      .then(() => {
+        resetForm(donationForm);
+        console.log(
+          "Thank you for your donation, looking forward to seeing you."
+        );
+      });
   }
   if (onetimeMoney !== "" && inWhoseName !== "") {
     db.collection("moneyDonation").add({
@@ -527,9 +486,6 @@ function subscribe(e) {
     .then(console.log("successfully subscribed"));
 }
 
-// donate stuff on logged in page
-const stuffDonationForm = document.querySelector("#stuffDonationForm form");
-stuffDonationForm.addEventListener("submit", stuffDonate);
 function stuffDonate(e) {
   e.preventDefault();
   const userEmail = window.sessionStorage.getItem("userEmail");
@@ -541,7 +497,10 @@ function stuffDonate(e) {
       stuff: stuff,
       pickup: pickup
     })
-    .then(console.log("stuff donated"));
+    .then(() => {
+      resetForm(stuffDonationForm);
+      console.log("stuff donated");
+    });
   if (pickup === true) {
     const errandsDesc = `Pick up a ${stuff} from ${userEmail}`;
     db.collection("notifications")
@@ -555,9 +514,9 @@ function stuffDonate(e) {
   }
 }
 
-/**************************************
- * functions that GET data from database and display them
- *************************************/
+/*-------------------------------------------------------
+functions that GET data from database and display them
+--------------------------------------------------------*/
 function getUserDonationSofar(userEmail) {
   db.collection("timeDonation")
     .where("userEmail", "==", userEmail)
@@ -652,7 +611,7 @@ function getUserSetting(userEmail) {
     });
 }
 
-function getUserNotifications(userEmail) {
+function getUserNewsfeed(userEmail) {
   newsFeedPanel.innerHTML = "";
   // check user preferences regarding notifications
   db.collection("member")
@@ -667,7 +626,7 @@ function getUserNotifications(userEmail) {
           getNewcoming();
         }
         getUrgent();
-        getOtherNotification();
+        getOtherNewsfeed();
       });
     });
 }
@@ -710,7 +669,7 @@ function getUrgent() {
       });
     });
 }
-function getOtherNotification() {
+function getOtherNewsfeed() {
   db.collection("notifications")
     .where("type", "==", "other")
     .get()
@@ -736,7 +695,7 @@ function getUserAnimals(userEmail) {
         } else if (entry.data().seeDog && entry.data().seeCat === false) {
           showDogs(userEmail);
         } else {
-          showAllAnimal(userEmail);
+          showAllAnimals(userEmail);
         }
       });
     });
@@ -759,13 +718,14 @@ function showDogs(userEmail) {
       appendEachAnimal(res, userEmail);
     });
 }
-function showAllAnimal(userEmail) {
+function showAllAnimals(userEmail) {
   db.collection("animals")
     .get()
     .then(res => {
       appendEachAnimal(res, userEmail);
     });
 }
+
 function appendEachAnimal(array, userEmail) {
   animalListOnLoggedIn.innerHTML = "";
   array.forEach(entry => {
@@ -847,9 +807,9 @@ function showAnimalModal(animalId) {
     });
 }
 
-/**************************************
- * general display functions, reusable
- **************************************/
+/*----------------------------------
+general display functions, reusable
+-----------------------------------*/
 
 function hideArrayElements(array) {
   array.forEach(removeElement => {
@@ -903,118 +863,31 @@ function syncNrWithRange(form, element) {
   });
 }
 
-/*--------------------------------------
-Intersection observer on the admin sidebar menu
--------------------------------------*/
+/*-------------------------
+specific display functions
+-------------------------*/
 
-//get sections from the DOM
-const dailyTasksSection = document.querySelector(".animalTasks");
-const dailyTasksAnchor = document.querySelector("aside ul li:nth-child(1) a");
-const postAndNotifySection = document.querySelector(".postBtn");
-const postAndNotifyAnchor = document.querySelector(
-  "aside ul li:nth-child(2) a"
-);
-const statusSection = document.querySelector(".listOfDonations");
-const statusAnchor = document.querySelector("aside ul li:nth-child(3) a");
-
-//Observe daily tasks section
-let observerDailyTasks = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.intersectionRatio > 0) {
-      dailyTasksAnchor.classList.add("activeAnchor");
-      //postAndNotifyAnchor.classList.remove("activeAnchor");
-    } else {
-      dailyTasksAnchor.classList.remove("activeAnchor");
-    }
-  });
-});
-
-observerDailyTasks.observe(dailyTasksSection);
-
-//Observe post and notify section
-let postAndNotifyobserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.intersectionRatio > 0) {
-      postAndNotifyAnchor.classList.add("activeAnchor");
-      //dailyTasksAnchor.classList.remove("activeAnchor");
-      //statusAnchor.classList.remove("activeAnchor");
-    } else {
-      postAndNotifyAnchor.classList.remove("activeAnchor");
-    }
-  });
-});
-
-postAndNotifyobserver.observe(postAndNotifySection);
-
-//Observe status section
-let statusObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.intersectionRatio > 0) {
-      statusAnchor.classList.add("activeAnchor");
-      //postAndNotifyAnchor.classList.remove("activeAnchor");
-    } else {
-      statusAnchor.classList.remove("activeAnchor");
-    }
-  });
-});
-
-statusObserver.observe(statusSection);
-
-//Click to see more animals
-let changeTimes = 0;
-
+// Click left/right arrow to browse through animals
 function moveAnimals() {
   const leftKey = document.querySelector("#animalArrowLeft");
   const rightKey = document.querySelector("#animalArrowRight");
 
-  const moveAnimalList = document.querySelector("#animalList");
-
-  //const boundRect = moveAnimalList.getBoundingClientRect().width;
-
-  //console.log(boundRect);
-
-  //circular buffer
   leftKey.addEventListener("click", () => {
     const last = document.querySelector("#animalList").lastElementChild;
     const first = document.querySelector("#animalList").firstElementChild;
 
     last.remove();
-
     document.querySelector("#animalList").insertBefore(last, first);
-
-    //  changeTimes += 1;
-    //  moveAnimalList.style.left = 174 * changeTimes + "px";
   });
 
   rightKey.addEventListener("click", () => {
-    // find first element in animalList
     const first = document.querySelector("#animalList").firstElementChild;
 
-    //removeit
     first.remove();
-
-    //insert as lastelement
     document.querySelector("#animalList").appendChild(first);
+  });
+}
 
-    //changeTimes -= 1;
-    //moveAnimalList.style.left = 174 * changeTimes + "px";
-  });
-}
-/*--------------------------------------
-Open preference modal
--------------------------------------*/
-function preferenceSetting(email) {
-  // sync donation value text when user adjust range bar
-  syncNrWithRange(preferenceForm, preferenceForm.querySelector(".donationNr"));
-  // submit form in 2 ways
-  const submitPrefBtn = document.querySelector("#submitPrefBtn");
-  const skipPrefBtn = document.querySelector("#skipPrefBtn");
-  preferenceForm.addEventListener("submit", sendPreferenceToDatabase);
-  skipPrefBtn.addEventListener("click", () => {
-    sendPreferenceToDatabase();
-    hideElement(prefModal);
-  });
-}
 /*-------------------------------------------
 Upload an image to database
 ------------------------------------------*/
@@ -1050,86 +923,74 @@ fileButton.addEventListener("change", function(e) {
     }
   );
 });
-//////////////  admin page
-/*-------------------------------------------
-Render tasks from database into website 
---------------------------------------------*/
-let taskList = document.querySelector(".toDoListWrapper");
 
-function renderTask(doc) {
-  let taskDiv = document.createElement("div");
-  let task = document.createElement("span");
-  let taskCheckbox = document.createElement("input");
-  taskCheckbox.type = "checkbox";
+/*--------------------------------------
+Add data to expand & open expands
+-------------------------------------*/
 
-  taskDiv.setAttribute("data-id", doc.id);
-  if (doc.data().writer !== "admin") {
-    task.textContent = "From " + doc.data().writer + ": ";
-    task.classList.add("userMessage");
+function cloneAnimalInfo(data, animalID) {
+  const src = document
+    .querySelector(`.eachAnimal[data-id="${animalID}"] img`)
+    .getAttribute("src");
+  petExpand.innerHTML = "";
+  const clone = detailedAnimalTemp.cloneNode(true);
+  clone.querySelector(".bigAnimalImage img").setAttribute("src", src);
+  clone.querySelector(".animalName").textContent = data.name;
+  clone.querySelector(".animalBreed").textContent = data.breed;
+  clone.querySelector(".animalAge").textContent = data.age;
+  clone.querySelector(".animalGender").textContent = data.gender;
+  clone.querySelector(".animalSize").textContent = data.size;
+  if (!data.young) {
+    clone.querySelector(".animalPup").style.display = "none";
   }
-  task.textContent += doc.data().task;
-  taskDiv.appendChild(taskCheckbox);
-  taskDiv.appendChild(task);
-  taskList.appendChild(taskDiv);
+  if (!data.pregnant) {
+    clone.querySelector(".animalPregnant").style.display = "none";
+  }
+  clone.querySelector(".animalStory").textContent = data.story;
+  clone.querySelector(".money").textContent = data.money;
+  clone.querySelector(".name").textContent = data.name;
+  // append the donation section of this animal
+  let donationClone = donationTemp.cloneNode(true);
+  donationClone.querySelector("form").setAttribute("data-id", animalID);
+  const donationForm = donationClone.querySelector("form");
+  const morning = donationClone.querySelector("label.morning");
+  const afternoon = donationClone.querySelector("label.afternoon");
+  const evening = donationClone.querySelector("label.evening");
+  const training = donationClone.querySelector("label.training");
+  // need to read db to get needed time slots
+  db.collection("dailyTaskTemplate")
+    .where("animalID", "==", animalID)
+    .get()
+    .then(res => {
+      res.forEach(entry => {
+        if (entry.data().morning === false) {
+          morning.classList.add("crossout");
+          morning.querySelector("input").setAttribute("disabled", "disabled");
+        }
+        if (entry.data().afternoon === false) {
+          afternoon.classList.add("crossout");
+          afternoon.querySelector("input").setAttribute("disabled", "disabled");
+        }
+        if (entry.data().evening === false) {
+          evening.classList.add("crossout");
+          evening.querySelector("input").setAttribute("disabled", "disabled");
+        }
+        if (entry.data().training === false) {
+          training.classList.add("crossout");
+          training.querySelector("input").setAttribute("disabled", "disabled");
+        }
+      });
+    });
+  donationForm.addEventListener("submit", memberDonate);
 
-  //deleting/completing tasks
+  petExpand.appendChild(clone);
+  petExpand.appendChild(donationClone);
+  const closeExpandBtn = document.querySelector(".closeExpandBtn");
 
-  taskCheckbox.addEventListener("click", e => {
-    e.stopPropagation();
-    let id = e.target.parentElement.getAttribute("data-id");
-    db.collection("toDoList")
-      .doc(id)
-      .delete();
+  const triangleUp = document.querySelectorAll(".triangleUp");
+
+  closeExpandBtn.addEventListener("click", () => {
+    petExpand.style.display = "none";
+    hideArrayElements(triangleUp);
   });
 }
-
-/*-------------------------------------------
-                Add to do task
-------------------------------------------*/
-
-const toDoBtn = document.querySelector(".addToDoBtn");
-const toDoInput = document.querySelector(".subsectionToDo input");
-
-toDoBtn.addEventListener("click", e => {
-  e.preventDefault();
-  db.collection("toDoList").add({
-    task: toDoInput.value,
-    writer: "admin",
-    type: "To Do"
-  });
-  toDoInput.value = "";
-});
-
-/*-------------------------------------------
-               live updates
-------------------------------------------*/
-db.collection("toDoList").onSnapshot(snapshot => {
-  let changes = snapshot.docChanges();
-  //console.log(changes);
-  changes.forEach(change => {
-    if (change.type == "added") {
-      renderTask(change.doc);
-    } else if (change.type == "removed") {
-      let taskDiv = taskList.querySelector("[data-id='" + change.doc.id + "']");
-      taskList.removeChild(taskDiv);
-    }
-  });
-});
-
-/*-------------------------------------------
-Post message from admin to notifications panel
-------------------------------------------*/
-
-const adminPostBtn = document.querySelector(".postBtn");
-const adminPostInput = document.querySelector(".writeNotification");
-const notificationForm = document.querySelector("#nofiticationAdmin");
-adminPostBtn.addEventListener("click", e => {
-  console.log("message posted");
-  e.preventDefault();
-  db.collection("notifications").add({
-    text: adminPostInput.value,
-    type: notificationForm.type.value,
-    image: ""
-  });
-  adminPostInput.value = "";
-});
