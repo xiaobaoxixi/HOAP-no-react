@@ -33,7 +33,12 @@ main::-webkit-scrollbar,
 body {
   font-family: $font;
 }
-
+.hiddenContent {
+  display: none;
+}
+.shownContent {
+  display: block;
+}
 #addPetForm {
   background-color: lightblue;
 }
@@ -52,19 +57,14 @@ body {
   grid-template-columns: 1fr 1fr;
   box-shadow: 0px 3px 20px 3px rgba(195, 195, 195, 0.77);
   img {
-    width: 150px;
-    padding: 18px;
+    height: 60px;
+    padding: 13px;
     fill: #818181;
     align-self: center;
   }
   //navbar on signed in page
   #sidebarBtns {
-    display: none;
     justify-self: end;
-    img {
-      width: 65px;
-      padding: 13px;
-    }
     #newsBtn {
       margin-right: 10px;
     }
@@ -95,9 +95,9 @@ body {
       color: $purpleColor;
     }
   }
-  #signoutAdmin {
-    display: none;
-  }
+  // #signoutAdmin {
+  //   display: none;
+  // }
 }
 
 /*------------------------------
@@ -1033,7 +1033,7 @@ button:focus {
   #userSettings,
   #newsFeed {
     color: #717070;
-    display: none;
+    // display: none;
     box-shadow: 3px 1px 17px 3px rgba(155, 155, 155, 0.68);
     z-index: 3;
     height: calc(100vh - 60px);
@@ -1044,8 +1044,8 @@ button:focus {
     top: 60px;
     width: 280px;
     padding: 20px;
-    & > * {
-    }
+    // & > * {
+    // }
 
     h2 {
       padding-bottom: 10px;
@@ -1471,9 +1471,9 @@ Keyframes for border radius header image
     }
   }
 }
-.visible {
-  display: block !important;
-}
+// .visible {
+//   display: block !important;
+// }
 
 /* -----------------------
         admin 
@@ -2622,13 +2622,14 @@ Keyframes for border radius header image
   /* ----------------------
         Signed in page
 -----------------------*/
-#loginForm{
-  width: 62vw;
-}
+  #loginForm {
+    width: 62vw;
+  }
 
   #signedInContent {
     #userSettings,
     #newsFeed {
+      display: block;
       width: 100vw;
       padding: 50px;
       padding-bottom: 100px;
@@ -2656,7 +2657,7 @@ Keyframes for border radius header image
 
   #newsBtn,
   #settingBtn {
-    display: none;
+    // display: none;
   }
 
   #mobileMenu {

@@ -15,18 +15,18 @@
     <div class="navbar">
       <img src="img/hoap-logo-01.svg" alt="HOAP logo">
 
-      <div class="darkBtn" id="alreadyMemberBtn">
+      <div class="darkBtn frontpageContent" id="alreadyMemberBtn">
         <a href="#">Already a member?</a>
       </div>
 
-      <div class="darkBtn" id="signoutAdmin"><a href="#">Sign out</a></div>
-      <div id="sidebarBtns">
+      <div class="darkBtn adminContent" id="signoutAdmin"><a href="#">Sign out</a></div>
+      <div class="userContent" id="sidebarBtns">
 
         <img src="img/user.svg" alt="user icon" id="settingBtn">
         <img src="img/paw.svg" alt="news icon" id="newsBtn">
       </div>
     </div>
-    <div id="loginForm">
+    <div class="hiddenContent" id="loginForm">
       <h2>Sign in</h2>
       <form>
         <div class="formField">
@@ -47,7 +47,7 @@
       </form>
     </div>
 
-    <div id="frontpageContent">
+    <div class="frontpageContent" id="frontpageContent">
       <div id="intro">
         <div class="introText">
           <div class="catchphrase">
@@ -484,7 +484,7 @@
       </div>
     </div>
 
-    <div id="signedInContent">
+    <div class="userContent" id="signedInContent">
       <div class="signedInContainer">
         <div id="yourPets">
          
@@ -521,7 +521,7 @@
       <div id="petExpand">
       </div>
 
-        <div id="userSettings">
+        <div class="hiddenContent" id="userSettings">
           <div class="user">
             <p>Hi <span class="userName"></span></p>
             <img src="img/john.jpg" alt="person" />
@@ -592,8 +592,7 @@
           </div>
           <button id="cancelMembership">Cancel membership</button>
         </div>
-      <div id="newsFeed">
-        
+      <div class="hiddenContent" id="newsFeed">
       </div>
 
       <div id="aboutLoggedIn">
@@ -742,7 +741,7 @@
       </div>
     </div>
 
-    <div id="admin">
+    <div class="adminContent" id="admin">
       <aside>
     
         <ul>
@@ -1223,7 +1222,7 @@
     </template>
     <script src="https://www.gstatic.com/firebasejs/5.6.0/firebase.js"></script>
     <script src="js/frontpage.js"></script>
-    <script src="js/menu.js"></script>
+    <!-- <script src="js/menu.js"></script> -->
     <script
       type="text/javascript"
       src="https://www.gstatic.com/charts/loader.js"

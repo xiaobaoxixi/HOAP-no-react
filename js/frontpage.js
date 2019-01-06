@@ -3,6 +3,13 @@
 /*-----------------------------------------
 Elements for HTML 
 ----------------------------------------*/
+const frontpageContent = document.querySelector("#frontpageContent");
+const signedInContent = document.querySelector("#signedInContent");
+const memberBtns = document.querySelector("#sidebarBtns");
+const signoutAdminBtn = document.querySelector("#signoutAdmin");
+const signOutButton = document.querySelector("#signOut");
+const footer = document.querySelector("#footer");
+
 const animalListOnLoggedIn = document.querySelector("#animalList");
 const eachAnimalTemp = document.querySelector("#eachAnimalTemp").content;
 const petExpand = document.querySelector("#petExpand");
@@ -19,6 +26,11 @@ const cancelMembershipBtn = document.querySelector("#cancelMembership");
 const detailedAnimalTemp = document.querySelector("#detailedAnimalTemp")
   .content;
 const donationTemp = document.querySelector("#memberDonation").content;
+/////////////////////////////
+const frontpageContentS = document.querySelectorAll(".frontpageContent");
+const userContentS = document.querySelectorAll(".userContent");
+const adminContentS = document.querySelectorAll(".adminContent");
+const closeByDefaultContents = document.querySelectorAll(".closeByDefault");
 
 /*-------------------------------------------
 Initialize Firebase
@@ -50,21 +62,15 @@ window.addEventListener("DOMContentLoaded", init);
 
 function init() {
   newsFeedPanel.innerHTML = "";
-
   signinButton.addEventListener("click", signinUser);
   signupBtn.addEventListener("click", signupUser);
   alreadyMemberBtn.addEventListener("click", openSigninForm);
+  signoutAdminBtn.addEventListener("click", signout);
+  signOutButton.addEventListener("click", signout);
 
   /*-------------------------------------------
 Display right content if user
 ------------------------------------------*/
-
-  const frontpageContent = document.querySelector("#frontpageContent");
-  const signedInContent = document.querySelector("#signedInContent");
-  const memberBtns = document.querySelector("#sidebarBtns");
-  const signoutAdminBtn = document.querySelector("#signoutAdmin");
-  const signOutButton = document.querySelector("#signOut");
-  const footer = document.querySelector("#footer");
 
   // check if a user session already exist, if yes, show content that matches this user
   // use as medium to pass info with page reload, since there's no AuthStateChange, the current code using onAuthStateChanged won't fire with page reload and therefore will lose the current user info which affects the user setting panel and the notifications
@@ -79,39 +85,39 @@ Display right content if user
     if (user && user.email === "admin@admin.com") {
       displayAnimals();
       adminSection.style.display = "block";
-      frontpageContent.style.display = "none";
-      signedInContent.style.display = "none";
-      signinForm.style.display = "none";
-      alreadyMemberBtn.style.display = "none";
-      memberBtns.style.display = "none";
+      // frontpageContent.style.display = "none";
+      // signedInContent.style.display = "none";
+      // signinForm.style.display = "none";
+      // alreadyMemberBtn.style.display = "none";
+      // memberBtns.style.display = "none";
       signoutAdminBtn.style.display = "block";
-      footer.style.display = "none";
+      //      footer.style.display = "none";
     } else if (user) {
-      adminSection.style.display = "none";
-      frontpageContent.style.display = "none";
-      signedInContent.style.display = "block";
-      signinForm.style.display = "none";
-      alreadyMemberBtn.style.display = "none";
-      memberBtns.style.display = "block";
-      signoutAdminBtn.style.display = "none";
-      //      buildAnimalListOnLoggedinPage();
+      hideArrayElements(frontpageContentS);
+      hideArrayElements(adminContentS);
+      hideArrayElements(closeByDefaultContents);
+      showArrayElements(userContentS);
       getUserAnimals(user.email);
       getUserSetting(user.email);
       getUserNotifications(user.email);
       getUserDonationSofar(user.email);
+      const settingBtn = document.querySelector("#settingBtn");
+      const newsBtn = document.querySelector("#newsBtn");
+      const userSettings = document.querySelector("#userSettings");
+      const newsFeed = document.querySelector("#newsFeed");
+      settingBtn.addEventListener("click", () => {
+        toggleElememnts(userSettings, newsFeed);
+      });
+      newsBtn.addEventListener("click", () => {
+        toggleElememnts(newsFeed, userSettings);
+      });
     } else {
-      adminSection.style.display = "none";
-      frontpageContent.style.display = "block";
-      signedInContent.style.display = "none";
-      alreadyMemberBtn.style.display = "block";
-      memberBtns.style.display = "none";
-      signoutAdminBtn.style.display = "none";
-      footer.style.display = "grid";
+      hideArrayElements(adminContentS);
+      hideArrayElements(userContentS);
+      showArrayElements(frontpageContentS);
+      showElement(footer);
     }
   });
-
-  signoutAdminBtn.addEventListener("click", signout);
-  signOutButton.addEventListener("click", signout);
 
   /*-------------------------------------------
 Render tasks from database into website 
@@ -976,23 +982,32 @@ function showAnimalModal(animalId) {
  **************************************/
 
 function showElement(ele) {
-  ele.style.display = "inherit";
-  ele.classList.add("visible");
+  ele.classList.remove("hiddenContent");
+  ele.style.display = "block";
 }
 
 function hideElement(ele) {
+  ele.classList.remove("shownContent");
   ele.style.display = "none";
-  ele.classList.remove("visible");
-}
-
-function toggleElememnt(ele) {
-  ele.classList.toggle("visible");
 }
 
 function hideArrayElements(array) {
   array.forEach(removeElement => {
     removeElement.style.display = "none";
   });
+}
+
+function showArrayElements(array) {
+  array.forEach(removeElement => {
+    removeElement.style.display = "block";
+  });
+}
+
+function toggleElememnts(showEle, hideEle) {
+  if (hideEle.classList.contains("shownContent")) {
+    hideEle.classList.remove("shownContent");
+  }
+  showEle.classList.toggle("shownContent");
 }
 
 function resetForm(form) {
