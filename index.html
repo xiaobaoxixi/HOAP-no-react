@@ -1204,19 +1204,18 @@
           <div>
             <p>
             <label>I'd like to donate 
-            <input type="number" name="moneyAmount"  min="0"> kr,-</label>
+            <input type="number" name="moneyAmount"  min="0" class="inline"> kr,-</label>
           </p>
-          <hr>
         </div>
-          <div class="timeSlots">
+          <div class="timeSlots formWrapper">
               <p>Pick a time you'd like to spend with this furry monster:</p>
               <p><input type="date" name="date"></p>
-              <p><label class="morning"><input type="checkbox" name="morning" value="morning">Morning</label></p>
+              <p><label class="morning"><input type="checkbox" name="morning" value="morning"> Morning</label></p>
               <p>
-            <label class="afternoon"><input type="checkbox" name="afternoon" value="afternoon">Afternoon</label></p>
-            <p><label class="evening"><input type="checkbox" name="evening" value="evening">Evening</label></p>
-            <p><label class="training"><input type="checkbox" name="traning" value="traning">Training</label></p>
-            <hr>
+            <label class="afternoon"><input type="checkbox" name="afternoon" value="afternoon"> Afternoon</label></p>
+            <p><label class="evening"><input type="checkbox" name="evening" value="evening"> Evening</label></p>
+            <p><label class="training"><input type="checkbox" name="traning" value="traning"> Training</label></p>
+            <div class="feedbackMsg"></div>
           </div>
           <input type="submit" value="I'm in" id="donationBtn" />
         </form>

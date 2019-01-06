@@ -291,9 +291,7 @@ function sendPreferenceToDatabase(e) {
 //   console.log("update user preferences");
 // }
 
-function memberDonate(e) {
-  e.preventDefault();
-  const donationSubmitForm = document.querySelector("#donationFormLogginIn");
+function memberDonate(donationSubmitForm) {
   const animalID = donationSubmitForm.dataset.id;
   const moneyAmount = donationSubmitForm.moneyAmount.value;
   const date = donationSubmitForm.date.value;
@@ -351,7 +349,11 @@ function memberDonate(e) {
               userEmail: userEmail,
               time: workingTimes
             })
-            .then(console.log("time registered"));
+            .then(() => {
+              const wrapper = document.querySelector(".timeSlots");
+              showFeedback(wrapper, "Thank you ~", "#c18e63");
+              console.log("time registered");
+            });
         } else {
           db.collection("timeDonation")
             .doc(res.docs[0].id)
@@ -364,7 +366,11 @@ function memberDonate(e) {
                 .update({
                   time: sumSofar
                 })
-                .then(console.log("time counted up"));
+                .then(() => {
+                  const wrapper = document.querySelector(".timeSlots");
+                  showFeedback(wrapper, "Thank you ~", "#c18e63");
+                  console.log("time counted up");
+                });
             });
         }
       });
@@ -383,9 +389,12 @@ function memberDonate(e) {
               animalID: animalID
             })
             .then(() => {
-              console.log("money donated");
+              const wrapper = document.querySelector(".timeSlots");
+              showFeedback(wrapper, "Thank you ~", "#c18e63");
             });
         } else {
+          const wrapper = document.querySelector(".timeSlots");
+          showFeedback(wrapper, "Thank you ~", "#c18e63");
           console.log("already donated before, will update sum");
           res.forEach(doc => {
             let sum = Number(doc.data().amount);
@@ -1005,6 +1014,21 @@ function cloneAnimalInfo(data, animalID) {
   let donationClone = donationTemp.cloneNode(true);
   donationClone.querySelector("form").setAttribute("data-id", animalID);
   const donationForm = donationClone.querySelector("form");
+  // set min date for datepicker to yesterday (in JS getDate()+1 is today)
+  const today = new Date();
+  const year = today.getFullYear().toString();
+  const month =
+    today.getMonth() + 1 > 9
+      ? (today.getMonth() + 1).toString()
+      : "0" + (today.getMonth() + 1).toString();
+  const day =
+    today.getDate() > 9
+      ? today.getDate().toString()
+      : "0" + today.getDate().toString();
+  donationClone
+    .querySelector('input[type="date"')
+    .setAttribute("min", `${year}-${month}-${day}`);
+
   const morning = donationClone.querySelector("label.morning");
   const afternoon = donationClone.querySelector("label.afternoon");
   const evening = donationClone.querySelector("label.evening");
@@ -1033,7 +1057,41 @@ function cloneAnimalInfo(data, animalID) {
         }
       });
     });
-  donationForm.addEventListener("submit", memberDonate);
+  donationForm.addEventListener("submit", validateMemberDonate);
+  function validateMemberDonate(e) {
+    e.preventDefault();
+    const donationSubmitForm = document.querySelector("#donationFormLogginIn");
+    const date = donationSubmitForm.date.value;
+    const morning = donationSubmitForm.morning.checked;
+    const afternoon = donationSubmitForm.afternoon.checked;
+    const evening = donationSubmitForm.evening.checked;
+    const training = donationSubmitForm.traning.checked;
+    if (
+      (morning === true ||
+        afternoon === true ||
+        evening === true ||
+        training === true) &&
+      !date
+    ) {
+      const wrapper = document.querySelector(".timeSlots");
+      showFeedback(wrapper, "Remember to pick a date", "#c18e63");
+    } else if (
+      morning !== true &&
+      afternoon !== true &&
+      evening !== true &&
+      training !== true &&
+      date
+    ) {
+      const wrapper = document.querySelector(".timeSlots");
+      showFeedback(
+        donationSubmitForm.querySelector(".timeSlots"),
+        "Remember to pick a time slot",
+        "#c18e63"
+      );
+    } else {
+      memberDonate(donationSubmitForm);
+    }
+  }
 
   petExpand.appendChild(clone);
   petExpand.appendChild(donationClone);
