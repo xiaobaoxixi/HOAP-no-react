@@ -12,6 +12,7 @@ $grayColor: #efefef;
 $darkGrayColor: #cacaca;
 $purpleColor: #2e2f4b;
 $redColor: #a81c1c;
+$brownColor: #c18e63;
 $breakpoint-mobile: 450px;
 $breakpoint-medium1: 650px;
 $breakpoint-medium2: 900px;
@@ -39,9 +40,22 @@ body {
 .shownContent {
   display: block;
 }
-#addPetForm {
-  background-color: lightblue;
+.formWrapper {
+  position: relative;
+  .feedbackMsg {
+    text-align: right;
+    position: absolute;
+    right: 0;
+    bottom: 20px;
+    width: 100%;
+    height: auto;
+    padding: 0 40px;
+    font-size: 0.8em;
+  }
 }
+// #addPetForm {
+//   background-color: lightblue;
+// }
 
 /* -----------------------
         Navbar 
@@ -151,7 +165,7 @@ button:focus {
 #messageForm,
 #imageForm,
 #stuffDonationForm {
-  padding: 40px;
+  padding: 40px 40px 60px 40px;
   color: grey;
   h2 {
     margin-bottom: 20px;
@@ -234,7 +248,7 @@ button:focus {
 
 #donationForm,
 #signupForm {
-  padding: 40px;
+  padding: 40px 40px 60px 40px;
   h2 {
     margin-bottom: 20px;
   }
@@ -447,7 +461,7 @@ button:focus {
       }
     }
     p {
-      color: #c18e63;
+      color: $brownColor;
     }
   }
   .introPic {
@@ -678,13 +692,13 @@ button:focus {
     border-radius: 30px;
     display: grid;
     margin: 5vw 0 10vw 0;
-    padding: 40px;
+    padding: 40px 40px 60px 40px;
     border-radius: 30px;
   }
   #donationForm,
   #signupForm {
     margin: 3vw 10vw 10vw 10vw;
-    padding: 40px;
+    padding: 40px 40px 60px 40px;
     border-radius: 30px;
   }
 }
@@ -740,7 +754,7 @@ button:focus {
 #signedInContent {
   #aboutLoggedIn {
     width: 100%;
-    color: #c18e63;
+    color: $brownColor;
     padding: 5vw 10vw 0 10vw;
     background-color: #ead8a6;
     h2 {
@@ -2417,7 +2431,7 @@ footer {
     #donationForm,
     #stuffDonationForm {
       margin: 50px;
-      padding: 40px;
+      padding: 40px 40px 60px 40px;
       border-radius: h2 {
         font-size: 20px;
         margin-top: 0px;

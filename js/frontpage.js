@@ -13,6 +13,7 @@ const userSettingPanel = document.querySelector("#userSettings");
 const donationStatus = document.querySelector("#donationStatus");
 const userSettingForm = userSettingPanel.querySelector("form");
 const oneTimeDonationForm = document.querySelector("#oneTimeDonation");
+const signupForm = document.querySelector("#signupForm");
 const subscribeForm = document.querySelector("#subscribeForm form");
 const messageForm = document.querySelector("#messageForm form");
 const prefModal = document.querySelector("#preferencesModal");
@@ -165,7 +166,11 @@ function signinUser(e) {
       startUserSession(signinEmail.value);
     })
     .catch(function(error) {
-      console.log(error);
+      if (String(error).indexOf("password") > -1) {
+        showFeedback(loginForm, "Wrong password, try again~", "red");
+      } else if (String(error).indexOf("user record") > -1) {
+        showFeedback(loginForm, "Seems like you haven't signed up yet", "red");
+      }
     });
 }
 
@@ -184,7 +189,15 @@ function signupUser(e) {
       preferenceSetting(currentUserEmail);
     })
     .catch(function(error) {
-      console.log(error);
+      if (String(error).indexOf("already") > -1) {
+        showFeedback(
+          signupForm,
+          "Looks like the owner of this email has already joined us.",
+          "white"
+        );
+      } else {
+        console.log(error);
+      }
     });
 }
 
@@ -422,6 +435,7 @@ function sendMessage(e) {
       })
       .then(() => {
         resetForm(messageForm);
+        showFeedback(messageForm.parentElement, "Got it~", "#c18e63");
         console.log("message sent");
       });
   }
@@ -435,7 +449,13 @@ function onetimeDonation(e) {
   const onetimeMoney = oneTimeDonationForm.onetimeMoney.value;
   const inWhoseName = oneTimeDonationForm.inWhoseName.value;
   // if user choose pick up, then this entry shows up in errands
-  if (stuff !== "" && pickup === true && postNr !== "") {
+  if (stuff !== "" && pickup === true && !postNr) {
+    showFeedback(
+      donationForm,
+      "Don't forget to tell us from which ZIP should we pick it up",
+      "white"
+    );
+  } else if (stuff !== "" && pickup === true && postNr !== "") {
     db.collection("stuffDonation")
       .add({
         stuff: stuff,
@@ -443,8 +463,10 @@ function onetimeDonation(e) {
       })
       .then(() => {
         resetForm(donationForm);
-        console.log(
-          "Thank you for your donation, we will contact you to arrange pickup."
+        showFeedback(
+          donationForm,
+          "Thank you for your donation, we will contact you to arrange pickup.",
+          "white"
         );
         const errandsDesc = `Pick up a ${stuff} from ${postNr}`;
         db.collection("notifications").add({
@@ -459,20 +481,40 @@ function onetimeDonation(e) {
       })
       .then(() => {
         resetForm(donationForm);
-        console.log(
-          "Thank you for your donation, looking forward to seeing you."
+        showFeedback(
+          donationForm,
+          "Thank you for your donation, looking forward to seeing you~",
+          "white"
         );
       });
   }
   if (onetimeMoney !== "" && inWhoseName !== "") {
-    db.collection("moneyDonation").add({
-      amount: onetimeMoney,
-      inTheNameOf: inWhoseName
-    });
+    db.collection("moneyDonation")
+      .add({
+        amount: onetimeMoney,
+        inTheNameOf: inWhoseName
+      })
+      .then(() => {
+        resetForm(donationForm);
+        showFeedback(
+          donationForm,
+          `Thank you and ${inWhoseName} for your donation, hope you can join us some day ~`,
+          "white"
+        );
+      });
   } else if (onetimeDonation !== "") {
-    db.collection("moneyDonation").add({
-      amount: onetimeMoney
-    });
+    db.collection("moneyDonation")
+      .add({
+        amount: onetimeMoney
+      })
+      .then(() => {
+        resetForm(donationForm);
+        showFeedback(
+          donationForm,
+          `Thank you for your donation, hope you can join us some day ~`,
+          "white"
+        );
+      });
   }
 }
 
@@ -499,7 +541,7 @@ function stuffDonate(e) {
     })
     .then(() => {
       resetForm(stuffDonationForm);
-      console.log("stuff donated");
+      showFeedback(stuffDonationForm.parentElement, "Thank you ~", "#c18e63");
     });
   if (pickup === true) {
     const errandsDesc = `Pick up a ${stuff} from ${userEmail}`;
@@ -508,9 +550,14 @@ function stuffDonate(e) {
         text: errandsDesc,
         type: "errands"
       })
-      .then(
-        console.log("your donation will be picked up by one of our members")
-      );
+      .then(() => {
+        resetForm(stuffDonationForm);
+        showFeedback(
+          stuffDonationForm.parentElement,
+          "Thank you ~ Your donation will be picked up by one of our members",
+          "#c18e63"
+        );
+      });
   }
 }
 
@@ -861,6 +908,11 @@ function syncNrWithRange(form, element) {
   form.querySelector('input[type="range"').addEventListener("change", e => {
     element.textContent = e.target.value;
   });
+}
+
+function showFeedback(form, error, color) {
+  form.querySelector(".feedbackMsg").textContent = error;
+  form.querySelector(".feedbackMsg").style.color = color;
 }
 
 /*-------------------------

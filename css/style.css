@@ -24,8 +24,17 @@ body {
 .shownContent {
   display: block; }
 
-#addPetForm {
-  background-color: lightblue; }
+.formWrapper {
+  position: relative; }
+  .formWrapper .feedbackMsg {
+    text-align: right;
+    position: absolute;
+    right: 0;
+    bottom: 20px;
+    width: 100%;
+    height: auto;
+    padding: 0 40px;
+    font-size: 0.8em; }
 
 /* -----------------------
         Navbar 
@@ -110,7 +119,7 @@ button:focus {
 #messageForm,
 #imageForm,
 #stuffDonationForm {
-  padding: 40px;
+  padding: 40px 40px 60px 40px;
   color: grey; }
   #loginForm h2,
   #messageForm h2,
@@ -225,7 +234,7 @@ button:focus {
 
 #donationForm,
 #signupForm {
-  padding: 40px; }
+  padding: 40px 40px 60px 40px; }
   #donationForm h2,
   #signupForm h2 {
     margin-bottom: 20px; }
@@ -592,14 +601,14 @@ button:focus {
     border-radius: 30px;
     display: grid;
     margin: 5vw 0 10vw 0;
-    padding: 40px;
+    padding: 40px 40px 60px 40px;
     border-radius: 30px; }
   #frontpageForms #donationForm,
   #frontpageForms #signupForm,
   #sendToUsForms #donationForm,
   #sendToUsForms #signupForm {
     margin: 3vw 10vw 10vw 10vw;
-    padding: 40px;
+    padding: 40px 40px 60px 40px;
     border-radius: 30px; }
 
 #sendToUsForms {
@@ -1981,7 +1990,7 @@ footer {
     #frontpageForms #donationForm,
     #frontpageForms #stuffDonationForm {
       margin: 50px;
-      padding: 40px;
+      padding: 40px 40px 60px 40px;
       border-radius: h2;
         border-radius-font-size: 20px;
         border-radius-margin-top: 0px; }

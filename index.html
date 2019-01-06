@@ -26,7 +26,7 @@
         <img src="img/paw.svg" alt="news icon" id="newsBtn">
       </div>
     </div>
-    <div class="hiddenContent" id="loginForm">
+    <div class="hiddenContent formWrapper" id="loginForm">
       <h2>Sign in</h2>
       <form>
         <div class="formField">
@@ -45,6 +45,7 @@
 
         <button type="submit" id="signinButton">Sign in</button>
       </form>
+      <div class="feedbackMsg"></div>
     </div>
 
     <div class="frontpageContent" id="frontpageContent">
@@ -435,7 +436,7 @@
           </div>
         </div>
         <div id="frontpageForms">
-          <div id="donationForm">
+          <div id="donationForm" class="formWrapper">
             <h2>One-time donation</h2>
             <p>* You can pick one or both *</p>
             <form id="oneTimeDonation">
@@ -461,8 +462,9 @@
 
               <button type="submit">Donate</button>
             </form>
+            <div class="feedbackMsg"></div>
           </div>
-          <div id="signupForm">
+          <div id="signupForm"  class="formWrapper">
             <h2>Sign up as member</h2>
             <form>
               <div class="formField">
@@ -479,6 +481,7 @@
               </div>
               <button id="signupBtn" type="submit">Sign up</button>
             </form>
+            <div class="feedbackMsg"></div>
           </div>
         </div>
       </div>
@@ -602,7 +605,7 @@
       </div>
 
       <div id="sendToUsForms" >
-        <div id="messageForm">
+        <div id="messageForm" class="formWrapper">
           <h2>Send us a message</h2>
           <form>
             <div class="formField">
@@ -611,8 +614,9 @@
             </div>
             <button type="submit">Send</button>
           </form>
+          <div class="feedbackMsg"></div>
         </div>
-        <div id="stuffDonationForm">
+        <div id="stuffDonationForm" class="formWrapper">
           <h2>Donate some stuff</h2>
           <form>
               <div class="formField">
@@ -625,8 +629,9 @@
                 </div>  
                 <button type="submit">Donate</button>
           </form>
+          <div class="feedbackMsg"></div>
         </div>
-        <div id="imageForm">
+        <div id="imageForm" class="formWrapper">
           <h2>Send us an image</h2>
           <form>
             <!-- <div class="formField">
@@ -642,6 +647,7 @@
             </div>
             <button type="submit">Send</button>
           </form>
+          <div class="feedbackMsg"></div>
         </div>
       </div>
 
