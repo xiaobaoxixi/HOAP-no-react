@@ -440,22 +440,22 @@
             <p>* You can pick one or both *</p>
             <form id="oneTimeDonation">
               <div class="formField">
-                <label><input type="text" placeholder="What" id="donateWhat" name="donateWhat" /></label>
+                <input type="text" placeholder="What" id="donateWhat" name="donateWhat" />
                 <label for="donateWhat">Thing you want to donate</label>
               </div>
               <label for="donateWhat"></label>
               <div class="pickUpBox">
-                <label><input type="checkbox" id="pickUp" name="pickup"/></label>
+                <input type="checkbox" id="pickUp" name="pickup"/>
                 <label for="pickUp">Want us to pick it up?</label>
                 <label><input type="number" placeholder="ZIP" min="300" max="9999" name="postNr"></label>
               </div>
               
               <div class="formField">
-                <label><input type="text" id="donateHowMuch" placeholder="How much" name="onetimeMoney" /></label>
+                <input type="text" id="donateHowMuch" placeholder="How much" name="onetimeMoney" />
                 <label for="donateHowMuch">How much</label>
               </div>
               <div class="formField">
-               <label><input type="text" id="donateWho" placeholder="In whose name" name="inWhoseName" /></label>
+               <input type="text" id="donateWho" placeholder="In whose name" name="inWhoseName" />
                 <label class="whoswName" for="donateWho">In whose name</label>
               </div>
 
@@ -466,15 +466,15 @@
             <h2>Sign up as member</h2>
             <form>
               <div class="formField">
-                <label><input type="email" id="signupEmail" placeholder="Your email" autocomplete="off"/></label>
+                <input type="email" id="signupEmail" placeholder="Your email" autocomplete="off"/>
                 <label for="signupEmail" class="formLabel">Your email</label>
               </div>
               <div class="formField">
-               <label> <input
+               <input
                   type="password"
                   id="signupPassword"
                   placeholder="Your password"
-                /></label>
+                />
                 <label for="signupPassword" class="formLabel" >Password</label>
               </div>
               <button id="signupBtn" type="submit">Sign up</button>
@@ -616,7 +616,7 @@
           <h2>Donate some stuff</h2>
           <form>
               <div class="formField">
-                  <label><input type="text" placeholder="What" id="donateWhatLoggedIn" name="donateWhatLoggedIn" /></label>
+                  <input type="text" placeholder="What" id="donateWhatLoggedIn" name="donateWhatLoggedIn" />
                   <label for="donateWhatLoggedIn">Thing you want to donate</label>
                 </div>
                 <div class="pickUpBox">
@@ -654,7 +654,6 @@
           <svg
           id="newsMenu"
           version="1.1"
-          id="newsButtonSvg"
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           x="0px"
@@ -714,7 +713,6 @@
           <svg
             id="settingMenu"
             version="1.1"
-            id="Layer_1"
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             x="0px"
@@ -932,8 +930,7 @@
                 <p><input type="checkbox" name="young"><label>Young animal</label></p>
                 <p><input type="checkbox" name="pregnant"><label>Pregnant </label></p>
                 <p><label><input type="text" placeholder="extra attention" name="extra"></label></p>
-                <div><input type="file" id="uploadBtnAdmin">
-                <label for="uploadBtnAdmin"><input type="file" name="filename"></label></div>
+                <div><label for="uploadBtnAdmin">Upload file<input type="file" id="uploadBtnAdmin"></label></div>
                 <button type="submit" class="addAnimalToDB">Add Animal</button>
               </form>
             </div>
@@ -1008,7 +1005,7 @@
               <hr>
               <p>Result: <span class="result"></span></p>
               <hr>
-              <i><p class="hint"></p></i>
+              <p class="hint"><i></i></p>
               <p>Fake saving: 50000 kr. including real one-time-donations of <span class="donationGain"></span> kr. </p>
               
             </div>

@@ -795,7 +795,7 @@ db.collection("animals")
               dogCost;
             document.querySelector(".result").textContent = result;
             if (result < 0) {
-              document.querySelector(".hint").textContent =
+              document.querySelector(".hint i").textContent =
                 "didn't raise enough money this month to cover the cost, must use reserve.";
             }
           });
