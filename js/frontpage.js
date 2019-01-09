@@ -1,5 +1,12 @@
 "use strict";
 
+const alwaysSub = ["other", "urgent"];
+let currentSub = [];
+currentSub = alwaysSub;
+const user = {
+  userEmail: "",
+  subscribe: currentSub
+};
 /*-----------------------------------------
 Elements for HTML 
 ----------------------------------------*/
@@ -9,6 +16,8 @@ const eachAnimalTemp = document.querySelector("#eachAnimalTemp").content;
 const petExpand = document.querySelector("#petExpand");
 const adminSection = document.querySelector("#admin");
 const newsFeedPanel = document.querySelector("#newsFeed");
+const newsFeedContent = document.querySelector("#newsFeed .newsFeedContent");
+const newFeedBtn = document.querySelector(".newFeedBtn");
 const userSettingPanel = document.querySelector("#userSettings");
 const donationStatus = document.querySelector("#donationStatus");
 const userSettingForm = userSettingPanel.querySelector("form");
@@ -67,7 +76,6 @@ function init() {
   addStaticListeners();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
 function pickContent() {
   //// with firebase Auth
   firebase.auth().onAuthStateChanged(function(user) {
@@ -114,6 +122,7 @@ function addStaticListeners() {
   newsBtn.addEventListener("click", () => {
     toggleElements(newsFeedPanel, userSettingPanel);
   });
+  newFeedBtn.addEventListener("click", markAllRead);
   cancelMembershipBtn.addEventListener("click", cancelMembership);
   messageForm.addEventListener("submit", sendMessage);
   stuffDonationForm.addEventListener("submit", stuffDonate);
@@ -142,8 +151,24 @@ function addStaticListeners() {
 }
 
 function startUserSession(email) {
-  window.sessionStorage.setItem("userEmail", email);
-  newsFeedPanel.innerHTML = "";
+  user.userEmail = email;
+  db.collection("member")
+    .where("email", "==", email)
+    .get()
+    .then(res => {
+      res.docs.forEach(entry => {
+        if (entry.data().notifyErrand) {
+          user.subscribe.push("errands");
+        }
+        if (entry.data().notifyNewcoming) {
+          user.subscribe.push("newComing");
+        }
+        Object.keys(user).forEach((key, i) => {
+          window.sessionStorage.setItem(key, Object.values(user)[i]);
+        });
+      });
+    });
+  newsFeedContent.innerHTML = "";
   resetForm(userSettingForm);
   clearContent(donationStatus);
   getUserSetting(email);
@@ -184,9 +209,10 @@ function signupUser(e) {
     .then(() => {
       // show preference popup and hide other panels
       showElement(prefModal);
-      window.sessionStorage.setItem("userEmail", signupEmail.value);
-      const currentUserEmail = window.sessionStorage.getItem("userEmail");
-      preferenceSetting(currentUserEmail);
+      startUserSession(signupEmail.value);
+      // window.sessionStorage.setItem("userEmail", signupEmail.value);
+      // const currentUserEmail = window.sessionStorage.getItem("userEmail");
+      preferenceSetting(signupEmail.value);
     })
     .catch(function(error) {
       if (String(error).indexOf("already") > -1) {
@@ -207,7 +233,15 @@ function signout() {
     .signOut()
     .then(function() {
       console.log("Succesfull logout");
-      window.sessionStorage.removeItem("userEmail");
+      Object.keys(window.sessionStorage).forEach(key => {
+        window.sessionStorage.removeItem(key);
+      });
+      currentSub = alwaysSub;
+      // alwaysSub.forEach(item => {
+      //   currentSub.push(item);
+      // });
+      console.log(currentSub);
+      user.subscribe = currentSub;
       toggleElements(userSettings);
     })
     .catch(function(error) {
@@ -418,7 +452,7 @@ function cancelMembership() {
       console.log("Thanks for being with us~ Hope we can see you again.");
       signout();
       db.collection("member")
-        .where("email", "==", currentUser.email)
+        .where("email", "==", user.userEmail)
         .get()
         .then(res =>
           res.forEach(doc => {
@@ -573,6 +607,23 @@ function stuffDonate(e) {
 }
 
 /*-------------------------------------------------------
+functions that UPDATE data from database and display them
+--------------------------------------------------------*/
+function markAllRead() {
+  const currentNotifications = newsFeedContent.querySelectorAll("p");
+  currentNotifications.forEach(n => {
+    const notificationID = n.dataset.id;
+    let oldArray = db.collection;
+    db.collection("notifications")
+      .doc(notificationID)
+      .update({
+        seenBy: firebase.firestore.FieldValue.arrayUnion(user.userEmail)
+      });
+  });
+  newsFeedContent.innerHTML = "";
+}
+
+/*-------------------------------------------------------
 functions that GET data from database and display them
 --------------------------------------------------------*/
 function getUserDonationSofar(userEmail) {
@@ -670,8 +721,10 @@ function getUserSetting(userEmail) {
 }
 
 function getUserNewsfeed(userEmail) {
-  newsFeedPanel.innerHTML = "";
+  newsFeedContent.innerHTML = "";
   // check user preferences regarding notifications
+  const subTo = user.subscribe;
+  console.log(subTo);
   db.collection("member")
     .where("email", "==", userEmail)
     .get()
@@ -694,10 +747,13 @@ function getErrands() {
     .get()
     .then(res => {
       res.forEach(entry => {
-        let p = document.createElement("p");
-        p.classList.add("errandsNotification");
-        p.textContent = entry.data().text;
-        newsFeedPanel.appendChild(p);
+        if (!entry.data().seenBy.includes(user.userEmail)) {
+          let p = document.createElement("p");
+          p.classList.add("errandsNotification");
+          p.textContent = entry.data().text;
+          p.dataset.id = entry.id;
+          newsFeedContent.appendChild(p);
+        }
       });
     });
 }
@@ -707,10 +763,13 @@ function getNewcoming() {
     .get()
     .then(res => {
       res.forEach(entry => {
-        let p = document.createElement("p");
-        p.classList.add("newComingNotification");
-        p.textContent = entry.data().text;
-        newsFeedPanel.appendChild(p);
+        if (!entry.data().seenBy.includes(user.userEmail)) {
+          let p = document.createElement("p");
+          p.classList.add("newComingNotification");
+          p.textContent = entry.data().text;
+          p.dataset.id = entry.id;
+          newsFeedContent.appendChild(p);
+        }
       });
     });
 }
@@ -720,10 +779,13 @@ function getUrgent() {
     .get()
     .then(res => {
       res.forEach(entry => {
-        let p = document.createElement("p");
-        p.classList.add("urgentNotification");
-        p.textContent = entry.data().text;
-        newsFeedPanel.appendChild(p);
+        if (!entry.data().seenBy.includes(user.userEmail)) {
+          let p = document.createElement("p");
+          p.classList.add("urgentNotification");
+          p.textContent = entry.data().text;
+          p.dataset.id = entry.id;
+          newsFeedContent.appendChild(p);
+        }
       });
     });
 }
@@ -733,10 +795,16 @@ function getOtherNewsfeed() {
     .get()
     .then(res => {
       res.forEach(entry => {
-        let p = document.createElement("p");
-        p.classList.add("otherNotification");
-        p.textContent = entry.data().text;
-        newsFeedPanel.appendChild(p);
+        if (
+          entry.data().seenBy.length === 0 ||
+          !entry.data().seenBy.includes(user.userEmail)
+        ) {
+          let p = document.createElement("p");
+          p.classList.add("otherNotification");
+          p.textContent = entry.data().text;
+          p.dataset.id = entry.id;
+          newsFeedContent.appendChild(p);
+        }
       });
     });
 }
@@ -1068,17 +1136,19 @@ function moveAnimals() {
 }
 
 /*-------------------------
-live update
+live update notification
 -------------------------*/
 db.collection("notifications").onSnapshot(snapshot => {
   let changes = snapshot.docChanges();
   changes.forEach(change => {
     if (change.type == "added") {
-      console.log("changes");
-      newsBtn.classList.add("flash");
-      newsBtn.addEventListener("animationend", () => {
-        newsBtn.classList.remove("flash");
-      });
+      const changedDoc = change.doc.data();
+      if (!changedDoc.seenBy.includes(user.userEmail)) {
+        newsBtn.classList.add("flash");
+        newsBtn.addEventListener("animationend", () => {
+          newsBtn.classList.remove("flash");
+        });
+      }
     }
   });
 });
