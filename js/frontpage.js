@@ -480,7 +480,8 @@ function onetimeDonation(e) {
         const errandsDesc = `Pick up a ${stuff} from ${postNr}`;
         db.collection("notifications").add({
           text: errandsDesc,
-          type: "errands"
+          type: "errands",
+          seenBy: []
         });
       });
   } else if (stuff !== "" && pickup === false) {
@@ -557,7 +558,8 @@ function stuffDonate(e) {
     db.collection("notifications")
       .add({
         text: errandsDesc,
-        type: "errands"
+        type: "errands",
+        seenBy: []
       })
       .then(() => {
         resetForm(stuffDonationForm);
@@ -1068,17 +1070,18 @@ function moveAnimals() {
 /*-------------------------
 live update
 -------------------------*/
-function checkNotification() {
-  db.collection("notifications").onSnapshot(snapshot => {
-    let changes = snapshot.docChanges();
-    changes.forEach(change => {
-      if (change.type == "added") {
-        console.log("changes");
-        newsBtn.classList.add("flash");
-      }
-    });
+db.collection("notifications").onSnapshot(snapshot => {
+  let changes = snapshot.docChanges();
+  changes.forEach(change => {
+    if (change.type == "added") {
+      console.log("changes");
+      newsBtn.classList.add("flash");
+      newsBtn.addEventListener("animationend", () => {
+        newsBtn.classList.remove("flash");
+      });
+    }
   });
-}
+});
 
 ///////////// not used yet  ////////////////
 /*-------------------------------------------

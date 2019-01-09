@@ -98,11 +98,15 @@ label {
     .navbar #sidebarBtns #newsBtn {
       margin-right: 10px; }
       .navbar #sidebarBtns #newsBtn.flash {
-        animation: flash 1.5s ease-in 3; }
+        animation: flash 1s ease-out 3; }
 
 @keyframes flash {
   50% {
-    opacity: 0.1; } }
+    opacity: 0.1;
+    fill: #c18e63; }
+  100% {
+    opacity: 1;
+    fill: #c18e63; } }
     .navbar #sidebarBtns #newsBtn,
     .navbar #sidebarBtns #settingBtn {
       cursor: pointer; }

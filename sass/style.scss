@@ -125,11 +125,16 @@ label {
     #newsBtn {
       margin-right: 10px;
       &.flash {
-        animation: flash 1.5s ease-in 3;
+        animation: flash 1s ease-out 3;
       }
       @keyframes flash {
         50% {
           opacity: 0.1;
+          fill: $brownColor;
+        }
+        100% {
+          opacity: 1;
+          fill: $brownColor;
         }
       }
     }
