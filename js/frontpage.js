@@ -103,11 +103,13 @@ function pickContent() {
   //// use session as a medium to pass info with page reload
   //// signin and signup will lead to startUserSession
   if (window.sessionStorage.getItem("userEmail")) {
-    const currentUserEmail = window.sessionStorage.getItem("userEmail");
-    getUserSetting(currentUserEmail);
-    getUserNewsfeed(currentUserEmail);
-    getUserDonationSofar(currentUserEmail);
-    getUserAnimals(currentUserEmail);
+    const userEmail = window.sessionStorage.getItem("userEmail");
+    const subscribe = window.sessionStorage.getItem("subscribe");
+    getUserSetting(userEmail);
+    console.log("from session");
+    getUserNewsfeed(subscribe);
+    getUserDonationSofar(userEmail);
+    getUserAnimals(userEmail);
   }
 }
 
@@ -167,13 +169,13 @@ function startUserSession(email) {
           window.sessionStorage.setItem(key, Object.values(user)[i]);
         });
       });
+      getUserNewsfeed(user.subscribe);
     });
   newsFeedContent.innerHTML = "";
   resetForm(userSettingForm);
   clearContent(donationStatus);
   getUserSetting(email);
   getUserDonationSofar(email);
-  getUserNewsfeed(email);
   getUserAnimals(email);
 }
 
@@ -237,10 +239,6 @@ function signout() {
         window.sessionStorage.removeItem(key);
       });
       currentSub = alwaysSub;
-      // alwaysSub.forEach(item => {
-      //   currentSub.push(item);
-      // });
-      console.log(currentSub);
       user.subscribe = currentSub;
       toggleElements(userSettings);
     })
@@ -720,6 +718,28 @@ function getUserSetting(userEmail) {
     });
 }
 
+function getUserNewsfeed(subscribe) {
+  if (typeof subscribe === "string") {
+    subscribe = subscribe.split(",");
+  }
+  subscribe.forEach(sub => {
+    db.collection("notifications")
+      .where("type", "==", sub)
+      .get()
+      .then(res => {
+        res.forEach(entry => {
+          if (!entry.data().seenBy.includes(user.userEmail)) {
+            let p = document.createElement("p");
+            p.classList.add(`${sub}Notification`);
+            p.textContent = entry.data().text;
+            p.dataset.id = entry.id;
+            newsFeedContent.appendChild(p);
+          }
+        });
+      });
+  });
+}
+/*
 function getUserNewsfeed(userEmail) {
   newsFeedContent.innerHTML = "";
   // check user preferences regarding notifications
@@ -808,7 +828,7 @@ function getOtherNewsfeed() {
       });
     });
 }
-
+*/
 function getUserAnimals(userEmail) {
   // check user preferences regarding notifications
   db.collection("member")
