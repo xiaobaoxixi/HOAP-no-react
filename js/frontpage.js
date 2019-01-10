@@ -7,6 +7,8 @@ const user = {
   userEmail: "",
   subscribe: currentSub
 };
+
+let newsStatus = false;
 /*-----------------------------------------
 Elements for HTML 
 ----------------------------------------*/
@@ -123,7 +125,9 @@ function addStaticListeners() {
   });
   newsBtn.addEventListener("click", () => {
     toggleElements(newsFeedPanel, userSettingPanel);
-    getUserNewsfeed(user.subscribe);
+    if (newsStatus === true) {
+      getUserNewsfeed(user.subscribe);
+    }
   });
   newFeedBtn.addEventListener("click", markAllRead);
   cancelMembershipBtn.addEventListener("click", cancelMembership);
@@ -730,7 +734,11 @@ function getUserNewsfeed(subscribe) {
       .get()
       .then(res => {
         res.forEach(entry => {
-          if (!entry.data().seenBy.includes(user.userEmail)) {
+          if (
+            !entry
+              .data()
+              .seenBy.includes(window.sessionStorage.getItem("userEmail"))
+          ) {
             let p = document.createElement("p");
             p.classList.add(`${sub}Notification`);
             p.textContent = entry.data().text;
@@ -738,6 +746,7 @@ function getUserNewsfeed(subscribe) {
             newsFeedContent.appendChild(p);
           }
         });
+        newsStatus = false;
       });
   });
 }
@@ -1077,12 +1086,14 @@ db.collection("notifications").onSnapshot(snapshot => {
     if (change.type == "added") {
       const changedDoc = change.doc.data();
       if (!changedDoc.seenBy.includes(user.userEmail)) {
+        newsStatus = true;
         newsBtn.classList.add("flash");
         newsBtn.addEventListener("animationend", () => {
           newsBtn.classList.remove("flash");
         });
         if (newsFeedPanel.classList.contains("shownContent")) {
           getUserNewsfeed(user.subscribe);
+          newsStatus = false;
         }
       }
     }
