@@ -155,7 +155,9 @@ function addStaticListeners() {
   const signupEmail = document.querySelector("#signupEmail");
   const signupBtn = document.querySelector("#signupBtn");
   signupBtn.addEventListener("click", signupUser);
-  signoutAdminBtn.addEventListener("click", signout);
+  signoutAdminBtn.addEventListener("click", e => {
+    signout(e, "admin");
+  });
   signOutButton.addEventListener("click", signout);
 
   oneTimeDonationForm.addEventListener("submit", onetimeDonation);
@@ -242,7 +244,8 @@ function signupUser(e) {
     });
 }
 
-function signout() {
+function signout(e, arr) {
+  console.log(arr);
   firebase
     .auth()
     .signOut()
@@ -253,7 +256,9 @@ function signout() {
       });
       currentSub = alwaysSub;
       user.subscribe = currentSub;
-      toggleElements(userSettings);
+      if (!arr) {
+        toggleElements(userSettings);
+      }
       clearElements(feedbackMsgS);
       scrollToTop();
     })
