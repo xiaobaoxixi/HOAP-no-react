@@ -994,7 +994,6 @@ button:focus {
 Preferences
 ------------------------*/
 #preferencesModal {
-  display: none;
   position: fixed;
   z-index: 30;
   padding-top: 100px;

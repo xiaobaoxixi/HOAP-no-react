@@ -3,7 +3,7 @@
 const alwaysSub = ["other", "urgent"];
 let currentSub = [];
 currentSub = alwaysSub;
-const user = {
+let user = {
   userEmail: "",
   subscribe: currentSub
 };
@@ -38,6 +38,7 @@ const frontpageContentS = document.querySelectorAll(".frontpageContent");
 const userContentS = document.querySelectorAll(".userContent");
 const adminContentS = document.querySelectorAll(".adminContent");
 const closeByDefaultContents = document.querySelectorAll(".closeByDefault");
+const feedbackMsgS = document.querySelectorAll(".feedbackMsg");
 /////////////////////////////
 let alreadyMemberBtn = document.querySelector("#alreadyMemberBtn");
 let loginForm = document.querySelector("#loginForm");
@@ -107,6 +108,10 @@ function pickContent() {
   if (window.sessionStorage.getItem("userEmail")) {
     const userEmail = window.sessionStorage.getItem("userEmail");
     const subscribe = window.sessionStorage.getItem("subscribe");
+    user = {
+      userEmail: userEmail,
+      subscribe: subscribe
+    };
     getUserSetting(userEmail);
     console.log("from session");
     getUserNewsfeed(subscribe);
@@ -197,7 +202,7 @@ function signinUser(e) {
     .signInWithEmailAndPassword(signinEmail.value, signinPassword.value)
     .then(() => {
       toggleElements(loginForm);
-      hideElement(prefModal);
+      clearElements(feedbackMsgS);
       startUserSession(signinEmail.value);
       scrollToTop();
     })
@@ -207,7 +212,7 @@ function signinUser(e) {
       } else if (String(error).indexOf("user record") > -1) {
         showFeedback(loginForm, "Seems like you haven't signed up yet", "red");
       } else {
-        showFeedback(loginForm, "Something went wrong");
+        showFeedback(loginForm, "Something went wrong, please try later again");
       }
     });
 }
@@ -220,13 +225,7 @@ function signupUser(e) {
     .auth()
     .createUserWithEmailAndPassword(signupEmail.value, signupPassword.value)
     .then(() => {
-      // show preference popup and hide other panels
-      showElement(prefModal);
-      ////////////////
-      startUserSession(signupEmail.value);
-      ////////////////
-      // window.sessionStorage.setItem("userEmail", signupEmail.value);
-      // const currentUserEmail = window.sessionStorage.getItem("userEmail");
+      toggleElements(prefModal);
       preferenceSetting(signupEmail.value);
       scrollToTop();
     })
@@ -255,6 +254,7 @@ function signout() {
       currentSub = alwaysSub;
       user.subscribe = currentSub;
       toggleElements(userSettings);
+      clearElements(feedbackMsgS);
       scrollToTop();
     })
     .catch(function(error) {
@@ -270,23 +270,20 @@ function preferenceSetting(email) {
   const submitPrefBtn = document.querySelector("#submitPrefBtn");
   const skipPrefBtn = document.querySelector("#skipPrefBtn");
 
-  preferenceForm.addEventListener("submit", sendPreferenceToDatabase);
-  skipPrefBtn.addEventListener("click", () => {
-    console.log("skip");
-    sendPreferenceToDatabase();
+  preferenceForm.addEventListener("submit", e => {
+    console.log(email);
+    sendPreferenceToDatabase(e, email);
+  });
+  skipPrefBtn.addEventListener("click", e => {
+    sendPreferenceToDatabase(e, email);
   });
 }
 /*-----------------------------------------------------------
 functions that write(POST,UPDATE,DELETE) to Firebase database
 ------------------------------------------------------------*/
 
-function sendPreferenceToDatabase(e) {
-  if (e) {
-    console.log("send preference");
-    e.preventDefault();
-  }
-  // get current user email
-  let email = window.sessionStorage.getItem("userEmail");
+function sendPreferenceToDatabase(e, email) {
+  e.preventDefault();
   // get values from preference form
   const nickname = preferenceForm.nickname.value;
   const catBol = preferenceForm.cat.checked ? true : false;
@@ -333,7 +330,8 @@ function sendPreferenceToDatabase(e) {
       // getUserAnimals(email);
     });
   // hide modal without waiting for db success
-  hideElement(prefModal);
+  toggleElements(prefModal);
+  //  hideElement(prefModal);
 }
 
 // function updatePreferenceToDatabase() {
@@ -958,13 +956,18 @@ function showArrayElements(array) {
   });
 }
 
+function clearElements(array) {
+  array.forEach(ele => {
+    ele.textContent = "";
+  });
+}
+
 function showElement(ele) {
   ele.classList.add("shownContent");
 }
 
 function hideElement(ele) {
   ele.classList.remove("shownContent");
-  ele.style.display = "none";
 }
 
 function toggleElements(showEle, hideEle) {
