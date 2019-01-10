@@ -1,5 +1,12 @@
 "use strict";
 
+const alwaysSub = ["other", "urgent"];
+let currentSub = [];
+currentSub = alwaysSub;
+const user = {
+  userEmail: "",
+  subscribe: currentSub
+};
 /*-----------------------------------------
 Elements for HTML 
 ----------------------------------------*/
@@ -9,6 +16,8 @@ const eachAnimalTemp = document.querySelector("#eachAnimalTemp").content;
 const petExpand = document.querySelector("#petExpand");
 const adminSection = document.querySelector("#admin");
 const newsFeedPanel = document.querySelector("#newsFeed");
+const newsFeedContent = document.querySelector("#newsFeed .newsFeedContent");
+const newFeedBtn = document.querySelector(".newFeedBtn");
 const userSettingPanel = document.querySelector("#userSettings");
 const donationStatus = document.querySelector("#donationStatus");
 const userSettingForm = userSettingPanel.querySelector("form");
@@ -67,7 +76,6 @@ function init() {
   addStaticListeners();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
 function pickContent() {
   //// with firebase Auth
   firebase.auth().onAuthStateChanged(function(user) {
@@ -95,11 +103,13 @@ function pickContent() {
   //// use session as a medium to pass info with page reload
   //// signin and signup will lead to startUserSession
   if (window.sessionStorage.getItem("userEmail")) {
-    const currentUserEmail = window.sessionStorage.getItem("userEmail");
-    getUserSetting(currentUserEmail);
-    getUserNewsfeed(currentUserEmail);
-    getUserDonationSofar(currentUserEmail);
-    getUserAnimals(currentUserEmail);
+    const userEmail = window.sessionStorage.getItem("userEmail");
+    const subscribe = window.sessionStorage.getItem("subscribe");
+    getUserSetting(userEmail);
+    console.log("from session");
+    getUserNewsfeed(subscribe);
+    getUserDonationSofar(userEmail);
+    getUserAnimals(userEmail);
   }
 }
 
@@ -114,6 +124,7 @@ function addStaticListeners() {
   newsBtn.addEventListener("click", () => {
     toggleElements(newsFeedPanel, userSettingPanel);
   });
+  newFeedBtn.addEventListener("click", markAllRead);
   cancelMembershipBtn.addEventListener("click", cancelMembership);
   messageForm.addEventListener("submit", sendMessage);
   stuffDonationForm.addEventListener("submit", stuffDonate);
@@ -142,13 +153,29 @@ function addStaticListeners() {
 }
 
 function startUserSession(email) {
-  window.sessionStorage.setItem("userEmail", email);
-  newsFeedPanel.innerHTML = "";
+  user.userEmail = email;
+  db.collection("member")
+    .where("email", "==", email)
+    .get()
+    .then(res => {
+      res.docs.forEach(entry => {
+        if (entry.data().notifyErrand) {
+          user.subscribe.push("errands");
+        }
+        if (entry.data().notifyNewcoming) {
+          user.subscribe.push("newComing");
+        }
+        Object.keys(user).forEach((key, i) => {
+          window.sessionStorage.setItem(key, Object.values(user)[i]);
+        });
+      });
+      getUserNewsfeed(user.subscribe);
+    });
+  newsFeedContent.innerHTML = "";
   resetForm(userSettingForm);
   clearContent(donationStatus);
   getUserSetting(email);
   getUserDonationSofar(email);
-  getUserNewsfeed(email);
   getUserAnimals(email);
 }
 
@@ -184,9 +211,10 @@ function signupUser(e) {
     .then(() => {
       // show preference popup and hide other panels
       showElement(prefModal);
-      window.sessionStorage.setItem("userEmail", signupEmail.value);
-      const currentUserEmail = window.sessionStorage.getItem("userEmail");
-      preferenceSetting(currentUserEmail);
+      startUserSession(signupEmail.value);
+      // window.sessionStorage.setItem("userEmail", signupEmail.value);
+      // const currentUserEmail = window.sessionStorage.getItem("userEmail");
+      preferenceSetting(signupEmail.value);
     })
     .catch(function(error) {
       if (String(error).indexOf("already") > -1) {
@@ -207,7 +235,11 @@ function signout() {
     .signOut()
     .then(function() {
       console.log("Succesfull logout");
-      window.sessionStorage.removeItem("userEmail");
+      Object.keys(window.sessionStorage).forEach(key => {
+        window.sessionStorage.removeItem(key);
+      });
+      currentSub = alwaysSub;
+      user.subscribe = currentSub;
       toggleElements(userSettings);
     })
     .catch(function(error) {
@@ -418,7 +450,7 @@ function cancelMembership() {
       console.log("Thanks for being with us~ Hope we can see you again.");
       signout();
       db.collection("member")
-        .where("email", "==", currentUser.email)
+        .where("email", "==", user.userEmail)
         .get()
         .then(res =>
           res.forEach(doc => {
@@ -480,7 +512,8 @@ function onetimeDonation(e) {
         const errandsDesc = `Pick up a ${stuff} from ${postNr}`;
         db.collection("notifications").add({
           text: errandsDesc,
-          type: "errands"
+          type: "errands",
+          seenBy: []
         });
       });
   } else if (stuff !== "" && pickup === false) {
@@ -557,7 +590,8 @@ function stuffDonate(e) {
     db.collection("notifications")
       .add({
         text: errandsDesc,
-        type: "errands"
+        type: "errands",
+        seenBy: []
       })
       .then(() => {
         resetForm(stuffDonationForm);
@@ -568,6 +602,23 @@ function stuffDonate(e) {
         );
       });
   }
+}
+
+/*-------------------------------------------------------
+functions that UPDATE data from database and display them
+--------------------------------------------------------*/
+function markAllRead() {
+  const currentNotifications = newsFeedContent.querySelectorAll("p");
+  currentNotifications.forEach(n => {
+    const notificationID = n.dataset.id;
+    let oldArray = db.collection;
+    db.collection("notifications")
+      .doc(notificationID)
+      .update({
+        seenBy: firebase.firestore.FieldValue.arrayUnion(user.userEmail)
+      });
+  });
+  newsFeedContent.innerHTML = "";
 }
 
 /*-------------------------------------------------------
@@ -667,9 +718,33 @@ function getUserSetting(userEmail) {
     });
 }
 
+function getUserNewsfeed(subscribe) {
+  if (typeof subscribe === "string") {
+    subscribe = subscribe.split(",");
+  }
+  subscribe.forEach(sub => {
+    db.collection("notifications")
+      .where("type", "==", sub)
+      .get()
+      .then(res => {
+        res.forEach(entry => {
+          if (!entry.data().seenBy.includes(user.userEmail)) {
+            let p = document.createElement("p");
+            p.classList.add(`${sub}Notification`);
+            p.textContent = entry.data().text;
+            p.dataset.id = entry.id;
+            newsFeedContent.appendChild(p);
+          }
+        });
+      });
+  });
+}
+/*
 function getUserNewsfeed(userEmail) {
-  newsFeedPanel.innerHTML = "";
+  newsFeedContent.innerHTML = "";
   // check user preferences regarding notifications
+  const subTo = user.subscribe;
+  console.log(subTo);
   db.collection("member")
     .where("email", "==", userEmail)
     .get()
@@ -692,10 +767,13 @@ function getErrands() {
     .get()
     .then(res => {
       res.forEach(entry => {
-        let p = document.createElement("p");
-        p.classList.add("errandsNotification");
-        p.textContent = entry.data().text;
-        newsFeedPanel.appendChild(p);
+        if (!entry.data().seenBy.includes(user.userEmail)) {
+          let p = document.createElement("p");
+          p.classList.add("errandsNotification");
+          p.textContent = entry.data().text;
+          p.dataset.id = entry.id;
+          newsFeedContent.appendChild(p);
+        }
       });
     });
 }
@@ -705,10 +783,13 @@ function getNewcoming() {
     .get()
     .then(res => {
       res.forEach(entry => {
-        let p = document.createElement("p");
-        p.classList.add("newComingNotification");
-        p.textContent = entry.data().text;
-        newsFeedPanel.appendChild(p);
+        if (!entry.data().seenBy.includes(user.userEmail)) {
+          let p = document.createElement("p");
+          p.classList.add("newComingNotification");
+          p.textContent = entry.data().text;
+          p.dataset.id = entry.id;
+          newsFeedContent.appendChild(p);
+        }
       });
     });
 }
@@ -718,10 +799,13 @@ function getUrgent() {
     .get()
     .then(res => {
       res.forEach(entry => {
-        let p = document.createElement("p");
-        p.classList.add("urgentNotification");
-        p.textContent = entry.data().text;
-        newsFeedPanel.appendChild(p);
+        if (!entry.data().seenBy.includes(user.userEmail)) {
+          let p = document.createElement("p");
+          p.classList.add("urgentNotification");
+          p.textContent = entry.data().text;
+          p.dataset.id = entry.id;
+          newsFeedContent.appendChild(p);
+        }
       });
     });
 }
@@ -731,14 +815,20 @@ function getOtherNewsfeed() {
     .get()
     .then(res => {
       res.forEach(entry => {
-        let p = document.createElement("p");
-        p.classList.add("otherNotification");
-        p.textContent = entry.data().text;
-        newsFeedPanel.appendChild(p);
+        if (
+          entry.data().seenBy.length === 0 ||
+          !entry.data().seenBy.includes(user.userEmail)
+        ) {
+          let p = document.createElement("p");
+          p.classList.add("otherNotification");
+          p.textContent = entry.data().text;
+          p.dataset.id = entry.id;
+          newsFeedContent.appendChild(p);
+        }
       });
     });
 }
-
+*/
 function getUserAnimals(userEmail) {
   // check user preferences regarding notifications
   db.collection("member")
@@ -1064,6 +1154,24 @@ function moveAnimals() {
     document.querySelector("#animalList").appendChild(first);
   });
 }
+
+/*-------------------------
+live update notification
+-------------------------*/
+db.collection("notifications").onSnapshot(snapshot => {
+  let changes = snapshot.docChanges();
+  changes.forEach(change => {
+    if (change.type == "added") {
+      const changedDoc = change.doc.data();
+      if (!changedDoc.seenBy.includes(user.userEmail)) {
+        newsBtn.classList.add("flash");
+        newsBtn.addEventListener("animationend", () => {
+          newsBtn.classList.remove("flash");
+        });
+      }
+    }
+  });
+});
 
 ///////////// not used yet  ////////////////
 /*-------------------------------------------

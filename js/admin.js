@@ -1006,7 +1006,8 @@ adminPostBtn.addEventListener("click", e => {
   db.collection("notifications").add({
     text: adminPostInput.value,
     type: notificationForm.type.value,
-    image: ""
+    image: "",
+    seenBy: []
   });
   adminPostInput.value = "";
 });
