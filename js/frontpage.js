@@ -123,6 +123,7 @@ function addStaticListeners() {
   });
   newsBtn.addEventListener("click", () => {
     toggleElements(newsFeedPanel, userSettingPanel);
+    getUserNewsfeed(user.subscribe);
   });
   newFeedBtn.addEventListener("click", markAllRead);
   cancelMembershipBtn.addEventListener("click", cancelMembership);
@@ -719,6 +720,7 @@ function getUserSetting(userEmail) {
 }
 
 function getUserNewsfeed(subscribe) {
+  newsFeedContent.innerHTML = "";
   if (typeof subscribe === "string") {
     subscribe = subscribe.split(",");
   }
@@ -739,96 +741,7 @@ function getUserNewsfeed(subscribe) {
       });
   });
 }
-/*
-function getUserNewsfeed(userEmail) {
-  newsFeedContent.innerHTML = "";
-  // check user preferences regarding notifications
-  const subTo = user.subscribe;
-  console.log(subTo);
-  db.collection("member")
-    .where("email", "==", userEmail)
-    .get()
-    .then(res => {
-      res.forEach(entry => {
-        if (entry.data().notifyErrand) {
-          getErrands();
-        }
-        if (entry.data().notifyNewcoming) {
-          getNewcoming();
-        }
-        getUrgent();
-        getOtherNewsfeed();
-      });
-    });
-}
-function getErrands() {
-  db.collection("notifications")
-    .where("type", "==", "errands")
-    .get()
-    .then(res => {
-      res.forEach(entry => {
-        if (!entry.data().seenBy.includes(user.userEmail)) {
-          let p = document.createElement("p");
-          p.classList.add("errandsNotification");
-          p.textContent = entry.data().text;
-          p.dataset.id = entry.id;
-          newsFeedContent.appendChild(p);
-        }
-      });
-    });
-}
-function getNewcoming() {
-  db.collection("notifications")
-    .where("type", "==", "newComing")
-    .get()
-    .then(res => {
-      res.forEach(entry => {
-        if (!entry.data().seenBy.includes(user.userEmail)) {
-          let p = document.createElement("p");
-          p.classList.add("newComingNotification");
-          p.textContent = entry.data().text;
-          p.dataset.id = entry.id;
-          newsFeedContent.appendChild(p);
-        }
-      });
-    });
-}
-function getUrgent() {
-  db.collection("notifications")
-    .where("type", "==", "urgent")
-    .get()
-    .then(res => {
-      res.forEach(entry => {
-        if (!entry.data().seenBy.includes(user.userEmail)) {
-          let p = document.createElement("p");
-          p.classList.add("urgentNotification");
-          p.textContent = entry.data().text;
-          p.dataset.id = entry.id;
-          newsFeedContent.appendChild(p);
-        }
-      });
-    });
-}
-function getOtherNewsfeed() {
-  db.collection("notifications")
-    .where("type", "==", "other")
-    .get()
-    .then(res => {
-      res.forEach(entry => {
-        if (
-          entry.data().seenBy.length === 0 ||
-          !entry.data().seenBy.includes(user.userEmail)
-        ) {
-          let p = document.createElement("p");
-          p.classList.add("otherNotification");
-          p.textContent = entry.data().text;
-          p.dataset.id = entry.id;
-          newsFeedContent.appendChild(p);
-        }
-      });
-    });
-}
-*/
+
 function getUserAnimals(userEmail) {
   // check user preferences regarding notifications
   db.collection("member")
@@ -1168,6 +1081,9 @@ db.collection("notifications").onSnapshot(snapshot => {
         newsBtn.addEventListener("animationend", () => {
           newsBtn.classList.remove("flash");
         });
+        if (newsFeedPanel.classList.contains("shownContent")) {
+          getUserNewsfeed(user.subscribe);
+        }
       }
     }
   });
