@@ -158,6 +158,8 @@ function addStaticListeners() {
 }
 
 function startUserSession(email) {
+  console.log("start session");
+  console.log(email);
   user.userEmail = email;
   db.collection("member")
     .where("email", "==", email)
@@ -195,13 +197,17 @@ function signinUser(e) {
     .signInWithEmailAndPassword(signinEmail.value, signinPassword.value)
     .then(() => {
       toggleElements(loginForm);
+      hideElement(prefModal);
       startUserSession(signinEmail.value);
+      scrollToTop();
     })
     .catch(function(error) {
       if (String(error).indexOf("password") > -1) {
         showFeedback(loginForm, "Wrong password, try again~", "red");
       } else if (String(error).indexOf("user record") > -1) {
         showFeedback(loginForm, "Seems like you haven't signed up yet", "red");
+      } else {
+        showFeedback(loginForm, "Something went wrong");
       }
     });
 }
@@ -216,10 +222,13 @@ function signupUser(e) {
     .then(() => {
       // show preference popup and hide other panels
       showElement(prefModal);
+      ////////////////
       startUserSession(signupEmail.value);
+      ////////////////
       // window.sessionStorage.setItem("userEmail", signupEmail.value);
       // const currentUserEmail = window.sessionStorage.getItem("userEmail");
       preferenceSetting(signupEmail.value);
+      scrollToTop();
     })
     .catch(function(error) {
       if (String(error).indexOf("already") > -1) {
@@ -246,6 +255,7 @@ function signout() {
       currentSub = alwaysSub;
       user.subscribe = currentSub;
       toggleElements(userSettings);
+      scrollToTop();
     })
     .catch(function(error) {
       // An error happened.
@@ -259,10 +269,11 @@ function preferenceSetting(email) {
   // submit form in 2 ways
   const submitPrefBtn = document.querySelector("#submitPrefBtn");
   const skipPrefBtn = document.querySelector("#skipPrefBtn");
+
   preferenceForm.addEventListener("submit", sendPreferenceToDatabase);
   skipPrefBtn.addEventListener("click", () => {
+    console.log("skip");
     sendPreferenceToDatabase();
-    hideElement(prefModal);
   });
 }
 /*-----------------------------------------------------------
@@ -271,6 +282,7 @@ functions that write(POST,UPDATE,DELETE) to Firebase database
 
 function sendPreferenceToDatabase(e) {
   if (e) {
+    console.log("send preference");
     e.preventDefault();
   }
   // get current user email
@@ -620,7 +632,9 @@ function markAllRead() {
     db.collection("notifications")
       .doc(notificationID)
       .update({
-        seenBy: firebase.firestore.FieldValue.arrayUnion(user.userEmail)
+        seenBy: firebase.firestore.FieldValue.arrayUnion(
+          window.sessionStorage.userEmail
+        )
       });
   });
   newsFeedContent.innerHTML = "";
@@ -924,6 +938,14 @@ function showClickedAnimalModal(data, animalID) {
 general display functions, reusable
 -----------------------------------*/
 
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: "smooth"
+  });
+}
+
 function hideArrayElements(array) {
   array.forEach(removeElement => {
     removeElement.style.display = "none";
@@ -942,6 +964,7 @@ function showElement(ele) {
 
 function hideElement(ele) {
   ele.classList.remove("shownContent");
+  ele.style.display = "none";
 }
 
 function toggleElements(showEle, hideEle) {

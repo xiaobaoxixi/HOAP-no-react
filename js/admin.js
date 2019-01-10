@@ -416,6 +416,8 @@ deleteAnimalBtn.addEventListener("click", e => {
 //   });
 // }
 
+let bigImage = document.createElement("img");
+
 // display animal details
 function showAnimalDetail(data, id, elem, editableBol) {
   const src = document
@@ -437,8 +439,8 @@ function showAnimalDetail(data, id, elem, editableBol) {
   });
   // if (editableBol === true) {
   // }
-  let bigImage = document.createElement("img");
   bigImage.setAttribute("src", src);
+  console.log(bigImage);
   elem.querySelector(".animalImageBig").appendChild(bigImage);
   // display newly fetched values
   elem.querySelector(".animalName").value = data.name;
@@ -458,9 +460,9 @@ function showAnimalDetail(data, id, elem, editableBol) {
   elem
     .querySelector(`input[value='${data.gender}']`)
     .setAttribute("checked", "checked");
-  elem
-    .querySelector(`input[value='${data.size}']`)
-    .setAttribute("checked", "checked");
+  // elem
+  //   .querySelector(`input[value='${data.size}']`)
+  //   .setAttribute("checked", "checked");
   elem.querySelector(".story-textarea").value = data.story;
   db.collection("dailyTaskTemplate")
     .where("animalID", "==", id)

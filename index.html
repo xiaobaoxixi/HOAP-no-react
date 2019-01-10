@@ -448,7 +448,11 @@
               <div class="pickUpBox">
                 <input type="checkbox" id="pickUp" name="pickup"/>
                 <label for="pickUp">Want us to pick it up?</label>
-                <label><input type="number" placeholder="ZIP" min="300" max="9999" name="postNr"></label>
+                <div class="formField">
+                  <input type="number" id="zip" placeholder="ZIP" min="300" max="9999" name="postNr">
+                  <label for="zip">ZIP</label>
+  
+                </div>
               </div>
               
               <div class="formField">
@@ -596,7 +600,7 @@
           <button id="cancelMembership">Cancel membership</button>
         </div>
       <div class="hiddenContent" id="newsFeed">
-        <button class="newFeedBtn">make all read</button>
+        <button class="newFeedBtn">clear all</button>
         <div class="newsFeedContent"></div>
       </div>
 

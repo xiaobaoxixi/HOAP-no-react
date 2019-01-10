@@ -683,8 +683,6 @@ button:focus {
     margin-bottom: 0px;
     margin-top: 15px;
     width: 100%; }
-  #frontpageForms #donationForm div.formField .whoswName {
-    font-size: 14px; }
   #frontpageForms #donationForm div.formField form button {
     margin-top: 50px;
     margin-bottom: 0px; }
@@ -2042,10 +2040,19 @@ footer {
     #frontpageForms #donationForm,
     #frontpageForms #stuffDonationForm {
       margin: 50px;
-      padding: 40px 40px 60px 40px;
-      border-radius: h2;
-        border-radius-font-size: 20px;
-        border-radius-margin-top: 0px; }
+      padding: 40px 40px 60px 40px; }
+      #sendToUsForms #messageForm h2,
+      #sendToUsForms #imageForm h2,
+      #sendToUsForms #signupForm h2,
+      #sendToUsForms #donationForm h2,
+      #sendToUsForms #stuffDonationForm h2,
+      #frontpageForms #messageForm h2,
+      #frontpageForms #imageForm h2,
+      #frontpageForms #signupForm h2,
+      #frontpageForms #donationForm h2,
+      #frontpageForms #stuffDonationForm h2 {
+        font-size: 20px;
+        margin-top: 0px; }
       #sendToUsForms #messageForm form button,
       #sendToUsForms #imageForm form button,
       #sendToUsForms #signupForm form button,
