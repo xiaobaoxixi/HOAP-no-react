@@ -920,6 +920,8 @@ button:focus {
     position: absolute;
     right: 20px;
     cursor: pointer; }
+  #signedInContent #newsFeed p.urgentNotification {
+    color: #a81c1c; }
 
 #signedInContent #newsFeed .clearNotification {
   font-weight: bold;

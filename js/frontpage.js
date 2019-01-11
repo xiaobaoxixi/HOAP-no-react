@@ -633,20 +633,25 @@ function stuffDonate(e) {
 /*-------------------------------------------------------
 functions that UPDATE data from database and display them
 --------------------------------------------------------*/
+function markRead(e) {
+  const notificationID = e.target.dataset.id;
+  updateNotificationSeenBy(notificationID, user.userEmail);
+  e.target.remove();
+}
 function markAllRead() {
   const currentNotifications = newsFeedContent.querySelectorAll("p");
   currentNotifications.forEach(n => {
     const notificationID = n.dataset.id;
-    let oldArray = db.collection;
-    db.collection("notifications")
-      .doc(notificationID)
-      .update({
-        seenBy: firebase.firestore.FieldValue.arrayUnion(
-          window.sessionStorage.userEmail
-        )
-      });
+    updateNotificationSeenBy(notificationID, user.userEmail);
   });
   newsFeedContent.innerHTML = "";
+}
+function updateNotificationSeenBy(id, user) {
+  db.collection("notifications")
+    .doc(id)
+    .update({
+      seenBy: firebase.firestore.FieldValue.arrayUnion(user)
+    });
 }
 
 /*-------------------------------------------------------
@@ -766,6 +771,7 @@ function getUserNewsfeed(subscribe) {
             p.classList.add(`${sub}Notification`);
             p.textContent = entry.data().text;
             p.dataset.id = entry.id;
+            p.addEventListener("click", markRead);
             newsFeedContent.appendChild(p);
           }
         });

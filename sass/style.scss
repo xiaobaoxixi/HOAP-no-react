@@ -1104,6 +1104,9 @@ button:focus {
         right: 20px;
         cursor: pointer;
       }
+      &.urgentNotification {
+        color: $redColor;
+      }
     }
     .clearNotification {
       font-weight: bold;
