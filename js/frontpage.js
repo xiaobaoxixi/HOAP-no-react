@@ -126,6 +126,9 @@ function addStaticListeners() {
 
   const newsBtn = document.querySelector("#newsBtn");
   newsBtn.addEventListener("click", () => {
+    if (statusCircle.classList.contains("shownContent")) {
+      toggleElements(statusCircle);
+    }
     toggleElements(newsFeedPanel, userSettingPanel);
     if (newsStatus === true) {
       getUserNewsfeed(user.subscribe);

@@ -915,6 +915,16 @@ button:focus {
 #signedInContent #newsFeed p {
   padding: 20px 0;
   border-bottom: 1px solid #eaeaea; }
+  #signedInContent #newsFeed p:not(.clearNotification)::after {
+    content: "X";
+    position: absolute;
+    right: 20px;
+    cursor: pointer; }
+
+#signedInContent #newsFeed .clearNotification {
+  font-weight: bold;
+  text-align: right;
+  cursor: pointer; }
 
 #signedInContent #userSettings,
 #signedInContent #newsFeed {
@@ -961,7 +971,7 @@ button:focus {
     grid-template-columns: 1fr 6vw; }
     #signedInContent #userSettings .user img,
     #signedInContent #newsFeed .user img {
-      place-self: center;
+      place-self: end;
       width: 4vw;
       border-radius: 50%; }
     #signedInContent #userSettings .user p,

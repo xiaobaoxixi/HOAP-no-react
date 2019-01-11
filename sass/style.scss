@@ -1098,6 +1098,17 @@ button:focus {
     p {
       padding: 20px 0;
       border-bottom: 1px solid #eaeaea;
+      &:not(.clearNotification)::after {
+        content: "X";
+        position: absolute;
+        right: 20px;
+        cursor: pointer;
+      }
+    }
+    .clearNotification {
+      font-weight: bold;
+      text-align: right;
+      cursor: pointer;
     }
   }
   #userSettings,
@@ -1149,7 +1160,7 @@ button:focus {
       display: grid;
       grid-template-columns: 1fr 6vw;
       img {
-        place-self: center;
+        place-self: end;
         width: 4vw;
         border-radius: 50%;
       }
