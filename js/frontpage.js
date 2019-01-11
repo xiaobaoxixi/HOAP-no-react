@@ -3,7 +3,7 @@
 const alwaysSub = ["other", "urgent"];
 let currentSub = [];
 currentSub = alwaysSub;
-let user = {
+const user = {
   userEmail: "",
   subscribe: currentSub
 };
@@ -19,7 +19,6 @@ const petExpand = document.querySelector("#petExpand");
 const adminSection = document.querySelector("#admin");
 const newsFeedPanel = document.querySelector("#newsFeed");
 const newsFeedContent = document.querySelector("#newsFeed .newsFeedContent");
-const newFeedBtn = document.querySelector(".newFeedBtn");
 const userSettingPanel = document.querySelector("#userSettings");
 const donationStatus = document.querySelector("#donationStatus");
 const userSettingForm = userSettingPanel.querySelector("form");
@@ -29,7 +28,6 @@ const subscribeForm = document.querySelector("#subscribeForm form");
 const messageForm = document.querySelector("#messageForm form");
 const prefModal = document.querySelector("#preferencesModal");
 const preferenceForm = document.querySelector("#preferencesModal form");
-const cancelMembershipBtn = document.querySelector("#cancelMembership");
 const detailedAnimalTemp = document.querySelector("#detailedAnimalTemp")
   .content;
 const donationTemp = document.querySelector("#memberDonation").content;
@@ -40,12 +38,12 @@ const adminContentS = document.querySelectorAll(".adminContent");
 const closeByDefaultContents = document.querySelectorAll(".closeByDefault");
 const feedbackMsgS = document.querySelectorAll(".feedbackMsg");
 /////////////////////////////
-let alreadyMemberBtn = document.querySelector("#alreadyMemberBtn");
 let loginForm = document.querySelector("#loginForm");
 const signoutAdminBtn = document.querySelector("#signoutAdmin");
 const signOutButton = document.querySelector("#signOut");
 const stuffDonationForm = document.querySelector("#stuffDonationForm form");
 
+const statusCircle = document.querySelector(".statusCircle");
 /*-------------------------------------------
 Initialize Firebase
 ------------------------------------------*/
@@ -108,10 +106,8 @@ function pickContent() {
   if (window.sessionStorage.getItem("userEmail")) {
     const userEmail = window.sessionStorage.getItem("userEmail");
     const subscribe = window.sessionStorage.getItem("subscribe");
-    user = {
-      userEmail: userEmail,
-      subscribe: subscribe
-    };
+    user.userEmail = userEmail;
+    user.subscribe = subscribe;
     getUserSetting(userEmail);
     console.log("from session");
     getUserNewsfeed(subscribe);
@@ -123,23 +119,30 @@ function pickContent() {
 function addStaticListeners() {
   // user interaction on logged-in page
   const settingBtn = document.querySelector("#settingBtn");
-  const newsBtn = document.querySelector("#newsBtn");
   settingBtn.addEventListener("click", () => {
     getUserDonationSofar(window.sessionStorage.getItem("userEmail"));
     toggleElements(userSettingPanel, newsFeedPanel);
   });
+
+  const newsBtn = document.querySelector("#newsBtn");
   newsBtn.addEventListener("click", () => {
     toggleElements(newsFeedPanel, userSettingPanel);
     if (newsStatus === true) {
       getUserNewsfeed(user.subscribe);
     }
   });
-  newFeedBtn.addEventListener("click", markAllRead);
+
+  const clearNotification = document.querySelector(".clearNotification");
+  clearNotification.addEventListener("click", markAllRead);
+
+  const cancelMembershipBtn = document.querySelector("#cancelMembership");
   cancelMembershipBtn.addEventListener("click", cancelMembership);
+
   messageForm.addEventListener("submit", sendMessage);
   stuffDonationForm.addEventListener("submit", stuffDonate);
 
   // user interaction on frontpage
+  let alreadyMemberBtn = document.querySelector("#alreadyMemberBtn");
   alreadyMemberBtn.addEventListener("click", e => {
     e.preventDefault();
     toggleElements(loginForm);
@@ -1118,10 +1121,13 @@ db.collection("notifications").onSnapshot(snapshot => {
       const changedDoc = change.doc.data();
       if (!changedDoc.seenBy.includes(user.userEmail)) {
         newsStatus = true;
-        newsBtn.classList.add("flash");
-        newsBtn.addEventListener("animationend", () => {
-          newsBtn.classList.remove("flash");
-        });
+        toggleElements(statusCircle);
+        if (!statusCircle.classList.contains("flash")) {
+          statusCircle.classList.add("flash");
+          statusCircle.addEventListener("animationend", () => {
+            statusCircle.classList.remove("flash");
+          });
+        }
         if (newsFeedPanel.classList.contains("shownContent")) {
           getUserNewsfeed(user.subscribe);
           newsStatus = false;

@@ -94,10 +94,23 @@ label {
     fill: #818181;
     align-self: center; }
   .navbar #sidebarBtns {
-    justify-self: end; }
+    justify-self: end;
+    position: relative; }
     .navbar #sidebarBtns #newsBtn {
       margin-right: 10px; }
-      .navbar #sidebarBtns #newsBtn.flash {
+    .navbar #sidebarBtns #newsBtn,
+    .navbar #sidebarBtns #settingBtn {
+      cursor: pointer; }
+    .navbar #sidebarBtns .statusCircle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      right: 10%;
+      bottom: 20%;
+      box-shadow: 3px 1px 17px 3px rgba(255, 255, 255, 0.83);
+      background-color: #a81c1c;
+      border-radius: 50%; }
+      .navbar #sidebarBtns .statusCircle.flash {
         animation: flash 1s ease-out 3; }
 
 @keyframes flash {
@@ -107,9 +120,6 @@ label {
   100% {
     opacity: 1;
     fill: #c18e63; } }
-    .navbar #sidebarBtns #newsBtn,
-    .navbar #sidebarBtns #settingBtn {
-      cursor: pointer; }
   .navbar .darkBtn {
     font-size: 13px;
     padding: 9px;
@@ -773,14 +783,6 @@ button:focus {
             width: 15%;
             left: 10%;
             bottom: -15%; }
-          #signedInContent #yourPets #animalBox #animalViewBox #animalList .eachAnimal .statusCircle {
-            width: 10px;
-            height: 10px;
-            right: 10%;
-            top: 10%;
-            box-shadow: 3px 1px 17px 3px rgba(255, 255, 255, 0.83);
-            background-color: #a81c1c;
-            border-radius: 50%; }
           #signedInContent #yourPets #animalBox #animalViewBox #animalList .eachAnimal * {
             pointer-events: none; }
 

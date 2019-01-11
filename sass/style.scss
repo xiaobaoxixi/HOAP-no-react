@@ -122,8 +122,23 @@ label {
   //navbar on signed in page
   #sidebarBtns {
     justify-self: end;
+    position: relative;
     #newsBtn {
       margin-right: 10px;
+    }
+    #newsBtn,
+    #settingBtn {
+      cursor: pointer;
+    }
+    .statusCircle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      right: 10%;
+      bottom: 20%;
+      box-shadow: 3px 1px 17px 3px rgba(255, 255, 255, 0.83);
+      background-color: #a81c1c;
+      border-radius: 50%;
       &.flash {
         animation: flash 1s ease-out 3;
       }
@@ -137,10 +152,6 @@ label {
           fill: $brownColor;
         }
       }
-    }
-    #newsBtn,
-    #settingBtn {
-      cursor: pointer;
     }
   }
 
@@ -900,15 +911,6 @@ button:focus {
               width: 15%;
               left: 10%;
               bottom: -15%;
-            }
-            .statusCircle {
-              width: 10px;
-              height: 10px;
-              right: 10%;
-              top: 10%;
-              box-shadow: 3px 1px 17px 3px rgba(255, 255, 255, 0.83);
-              background-color: #a81c1c;
-              border-radius: 50%;
             }
             cursor: pointer;
             * {
