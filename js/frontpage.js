@@ -286,7 +286,17 @@ function preferenceSetting(email) {
     sendPreferenceToDatabase(e, email);
   });
   skipPrefBtn.addEventListener("click", e => {
-    sendPreferenceToDatabase(e, email);
+    if (preferenceForm.nickname.value) {
+      sendPreferenceToDatabase(e, email);
+    } else {
+      console.log(document.querySelector("#modalTop"));
+      showFeedback(
+        document.querySelector("#modalTop"),
+        "At least let us know your nickname~",
+        "white"
+      );
+      document.querySelector("#nickName").focus();
+    }
   });
 }
 /*-----------------------------------------------------------
