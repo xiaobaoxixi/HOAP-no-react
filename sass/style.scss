@@ -122,8 +122,23 @@ label {
   //navbar on signed in page
   #sidebarBtns {
     justify-self: end;
+    position: relative;
     #newsBtn {
       margin-right: 10px;
+    }
+    #newsBtn,
+    #settingBtn {
+      cursor: pointer;
+    }
+    .statusCircle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      right: 10%;
+      bottom: 20%;
+      box-shadow: 3px 1px 17px 3px rgba(255, 255, 255, 0.83);
+      background-color: #a81c1c;
+      border-radius: 50%;
       &.flash {
         animation: flash 1s ease-out 3;
       }
@@ -137,10 +152,6 @@ label {
           fill: $brownColor;
         }
       }
-    }
-    #newsBtn,
-    #settingBtn {
-      cursor: pointer;
     }
   }
 
@@ -901,15 +912,6 @@ button:focus {
               left: 10%;
               bottom: -15%;
             }
-            .statusCircle {
-              width: 10px;
-              height: 10px;
-              right: 10%;
-              top: 10%;
-              box-shadow: 3px 1px 17px 3px rgba(255, 255, 255, 0.83);
-              background-color: #a81c1c;
-              border-radius: 50%;
-            }
             cursor: pointer;
             * {
               pointer-events: none;
@@ -1096,6 +1098,20 @@ button:focus {
     p {
       padding: 20px 0;
       border-bottom: 1px solid #eaeaea;
+      &:not(.clearNotification)::after {
+        content: "X";
+        position: absolute;
+        right: 20px;
+        cursor: pointer;
+      }
+      &.urgentNotification {
+        color: $redColor;
+      }
+    }
+    .clearNotification {
+      font-weight: bold;
+      text-align: right;
+      cursor: pointer;
     }
   }
   #userSettings,
@@ -1147,7 +1163,7 @@ button:focus {
       display: grid;
       grid-template-columns: 1fr 6vw;
       img {
-        place-self: center;
+        place-self: end;
         width: 4vw;
         border-radius: 50%;
       }
