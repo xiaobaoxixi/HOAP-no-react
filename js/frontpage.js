@@ -9,6 +9,7 @@ const user = {
 };
 
 let newsStatus = false;
+let onlyFollow = false;
 /*-----------------------------------------
 Elements for HTML 
 ----------------------------------------*/
@@ -168,6 +169,20 @@ function addStaticListeners() {
 
   oneTimeDonationForm.addEventListener("submit", onetimeDonation);
   subscribeForm.addEventListener("submit", subscribe);
+
+  const followFilter = document.querySelector(".following");
+  followFilter.addEventListener("click", toggleFollowing);
+  function toggleFollowing() {
+    onlyFollow = onlyFollow ? false : true;
+    const notFollowingS = document.querySelectorAll(
+      ".eachAnimal:not(.following)"
+    );
+    if (onlyFollow) {
+      hideArrayElements(notFollowingS);
+    } else {
+      showArrayElements(notFollowingS, "inline-block");
+    }
+  }
 }
 
 function startUserSession(email) {
@@ -977,9 +992,13 @@ function hideArrayElements(array) {
   });
 }
 
-function showArrayElements(array) {
+function showArrayElements(array, display) {
   array.forEach(removeElement => {
-    removeElement.style.display = "block";
+    if (display) {
+      removeElement.style.display = display;
+    } else {
+      removeElement.style.display = "block";
+    }
   });
 }
 
@@ -1083,6 +1102,7 @@ function appendEachAnimal(array, userEmail) {
           if (user.data().following.indexOf(entry.id) > -1) {
             heart.setAttribute("src", "img/icons/filledheart.png");
             heart.setAttribute("alt", "filled heart icon");
+            animalDiv.classList.add("following");
           } else {
             heart.setAttribute("src", "img/icons/emptyheart.png");
             heart.setAttribute("alt", "empty heart icon");
