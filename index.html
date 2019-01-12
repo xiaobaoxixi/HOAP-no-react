@@ -892,57 +892,54 @@
               </form>
               <div class="buttons">
                 <button class="closeModal">X</button>
-                <button class="editAnimal" data-action="edit">Edit</button>
+                <button class="editImage" data-action="editImage">Change image</button>
+                <button class="editAnimal" data-action="edit">Edit info</button>
                 <button class="deleteAnimal" data-action="delete">
-                  Delete
+                  Delete animal
                 </button>
               </div>
             </div>
             <div class="adminForm addAnimalForm hide">
               <span class="close">X</span>
               <form>
-                <p>Basic info</p>
-                <hr>
-                <p><input type="text" placeholder="Name of animal" name="animalName" required></p>
+                <h3>Basic info</h3>
+                <p><label>Name of Animal<input type="text" placeholder="Name of animal" name="animalName" required></label></p>
 
-                <p><input type="radio" id="chooseCat" name="type" value="cat"><label for="chooseCat">Cat</label>
+                <p><input type="radio" id="chooseCat" name="type" value="cat" required><label for="chooseCat"> Cat</label>
                   
-                <input type="radio" id="chooseDog" name="type" value="dog"><label for="chooseDog">Dog</label></p>
+                <input type="radio" id="chooseDog" name="type" value="dog" required><label for="chooseDog"> Dog</label></p>
 
                 <p><input type="number" id="chooseAge" min="0" name="age" placeholder="Age of animal"></p>
 
-                <p><input type="radio" id="chooseMale" name="gender" value="male"><label for="chooseMale">Male</label>
+                <p><input type="radio" id="chooseMale" name="gender" value="male"><label for="chooseMale"> Male</label>
                   
-                  <input type="radio" name="gender" id="chooseFemale" value="female"><label for="chooseFemale">Female</label></p>
+                  <input type="radio" name="gender" id="chooseFemale" value="female"><label for="chooseFemale"> Female</label></p>
 
 
                 <p><input type="text" placeholder="Breed" name="breed"></p>
 
-                <p><input type="radio" id="chooseSmall" name="size" value="S"><label for="chooseSmall">Small</label>
+                <p><input type="radio" id="chooseSmall" name="size" value="S"><label for="chooseSmall"> Small</label>
 
-                  <input type="radio" id="chooseMedium" name="size" value="M"><label for="chooseMedium">Medium</label>
+                  <input type="radio" id="chooseMedium" name="size" value="M"><label for="chooseMedium"> Medium</label>
                   
                   
-                  <input type="radio" id="chooseLarge" name="size" value="L"><label for="chooseLarge">Large</label></p>
+                  <input type="radio" id="chooseLarge" name="size" value="L"><label for="chooseLarge"> Large</label></p>
                 
                 <p><label>Money need per month<input type="number" placeholder="kr." name="money"></label></p>
                 
-                <p>Story</p>
-                <hr>
+                <h3>Story</h3>
                 <p><textarea placeholder="story" name="story"></textarea></p>
                 
-                <p>Needed exercises</p>
-                <hr>
-                <p><input type="checkbox" name="morning" value="morning"><label>Morning</label></p>
-                <p><input type="checkbox" name="afternoon" value="afternoon"><label>Afternoon</label></p>
-                <p><input type="checkbox" name="evening" value="evening"><label>Evening</label></p>
-                <p><input type="checkbox" name="training" value="training"><label>Training</label></p>
+                <h3>Needed exercises</h3>
+                <p><label><input type="checkbox" name="morning" value="morning"> Morning</label></p>
+                <p><label><input type="checkbox" name="afternoon" value="afternoon"> Afternoon</label></p>
+                <p><label><input type="checkbox" name="evening" value="evening"> Evening</label></p>
+                <p><label><input type="checkbox" name="training" value="training"> Training</label></p>
                 
-                <p>Special need</p>
-                <hr>
-                <p><input type="checkbox" name="young"><label>Young animal</label></p>
-                <p><input type="checkbox" name="pregnant"><label>Pregnant </label></p>
-                <p><label><input type="text" placeholder="extra attention" name="extra"></label></p>
+                <h3>Special need</h3>
+                <p><label><input type="checkbox" name="young"> Young animal</label></p>
+                <p><label><input type="checkbox" name="pregnant"> Pregnant </label></p>
+                <p><label>Extra attention<input type="text" placeholder="extra attention" name="extra"></label></p>
                 <div><label for="uploadBtnAdmin">Upload file<input type="file" id="uploadBtnAdmin"></label></div>
                 <button type="submit" class="addAnimalToDB">Add Animal</button>
               </form>

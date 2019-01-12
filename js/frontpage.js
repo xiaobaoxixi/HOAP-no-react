@@ -1127,7 +1127,11 @@ function appendEachAnimal(array, userEmail) {
     let animalArrow = document.createElement("div");
     animalArrow.classList.add("triangleUp");
     let animalImg = document.createElement("img");
-    animalImg.setAttribute("src", entry.data().file);
+    if (entry.data().file) {
+      animalImg.setAttribute("src", entry.data().file);
+    } else {
+      animalImg.setAttribute("src", "img/animals/newcomer.png");
+    }
     // due to Firebase storage quota limit, we decided to not to use images stored in Firebase
     ////////////////////////////////////////////////////////////
     // if (data.file !== undefined && data.file !== "") {
@@ -1234,6 +1238,7 @@ specific display functions
 
 // Click left/right arrow to browse through animals
 function moveAnimals() {
+  console.log("move");
   const leftKey = document.querySelector("#animalArrowLeft");
   const rightKey = document.querySelector("#animalArrowRight");
 

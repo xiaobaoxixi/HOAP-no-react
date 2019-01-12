@@ -291,7 +291,7 @@ function getFilename(evt) {
 }
 
 //add animal to db, including image file
-addAnimalToDbBtn.addEventListener("click", e => {
+addAnimalForm.addEventListener("submit", e => {
   e.preventDefault();
   //add to the specific collection in firestore
   db.collection("animals")
@@ -306,8 +306,8 @@ addAnimalToDbBtn.addEventListener("click", e => {
       young: addAnimalForm.young.checked ? true : false,
       pregnant: addAnimalForm.pregnant.checked ? true : false,
       money: addAnimalForm.money.value,
-      story: addAnimalForm.story.value,
-      file: addAnimalForm.filename.value
+      story: addAnimalForm.story.value
+      //      file: addAnimalForm.filename.value
     })
     .then(docRef => {
       const newlyAddedAnimalID = docRef.id;
@@ -320,7 +320,7 @@ addAnimalToDbBtn.addEventListener("click", e => {
         afternoon: addAnimalForm.afternoon.checked ? true : false,
         evening: addAnimalForm.evening.checked ? true : false,
         training: addAnimalForm.training.checked ? true : false,
-        extra: addAnimalForm.extra.value
+        extra: addAnimalForm.extra.value || ""
       });
       resetForm(addAnimalForm);
       // re run displayAnimals to update columns
@@ -454,9 +454,11 @@ function showAnimalDetail(data, id, elem, editableBol) {
       .querySelector(`input[name='pregnant']`)
       .setAttribute("checked", "checked");
   }
-  elem
-    .querySelector(`input[value='${data.gender}']`)
-    .setAttribute("checked", "checked");
+  if (data.gender) {
+    elem
+      .querySelector(`input[value='${data.gender}']`)
+      .setAttribute("checked", "checked");
+  }
   // elem
   //   .querySelector(`input[value='${data.size}']`)
   //   .setAttribute("checked", "checked");
