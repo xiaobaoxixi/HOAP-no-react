@@ -1,4 +1,6 @@
 "use strict";
+let newAnimal = false;
+let loaded = false;
 
 // html elements
 const addAnimalBtn = document.querySelector(".addAnimalBtn");
@@ -292,6 +294,7 @@ function getFilename(evt) {
 
 //add animal to db, including image file
 addAnimalForm.addEventListener("submit", e => {
+  newAnimal = true;
   e.preventDefault();
   //add to the specific collection in firestore
   db.collection("animals")
@@ -547,6 +550,7 @@ function getMemberStatus() {
             }
           });
         });
+      loaded = true;
     });
 
   // find max of time donations
@@ -726,6 +730,7 @@ document.querySelector(".fixCost").textContent =
 // animal cost
 function calcAnimalCost() {
   console.log("calc animal cost");
+  newAnimal = false;
   let catCost = 0;
   let dogCost = 0;
   db.collection("animals")
@@ -910,9 +915,15 @@ function showStatus() {
   dailyTasksAnchor.classList.remove("activeAnchor");
   postAndNotifyAnchor.classList.remove("activeAnchor");
   statusAnchor.classList.add("activeAnchor");
-  calcAnimalCost();
-  getMemberStatus();
-  countAnimals();
+  if (newAnimal) {
+    calcAnimalCost();
+    countAnimals();
+  }
+  if (!loaded) {
+    calcAnimalCost();
+    countAnimals();
+    getMemberStatus();
+  }
 }
 
 /*-------------------------------------------
