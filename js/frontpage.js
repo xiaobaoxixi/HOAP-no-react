@@ -111,15 +111,17 @@ function pickContent() {
   //// use session as a medium to pass info with page reload
   //// signin and signup will lead to startUserSession
   if (window.sessionStorage.getItem("userEmail")) {
+    console.log("from session");
     const userEmail = window.sessionStorage.getItem("userEmail");
     const subscribe = window.sessionStorage.getItem("subscribe");
-    user.userEmail = userEmail;
-    user.subscribe = subscribe;
-    getUserSetting(userEmail);
-    console.log("from session");
-    //    getUserNewsfeed(subscribe);
-    getUserDonationSofar(userEmail);
-    getUserAnimals(userEmail);
+    if (userEmail !== "admin@admin.com") {
+      user.userEmail = userEmail;
+      user.subscribe = subscribe;
+      getUserSetting(userEmail);
+      //    getUserNewsfeed(subscribe);
+      getUserDonationSofar(userEmail);
+      getUserAnimals(userEmail);
+    }
   }
 }
 
