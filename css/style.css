@@ -33,7 +33,7 @@ body {
     bottom: 20px;
     width: 100%;
     height: auto;
-    padding: 0 40px;
+    padding: 10px 40px;
     font-size: 0.8em; }
 
 input:not([type="checkbox"]) {
@@ -830,33 +830,37 @@ button:focus {
   #signedInContent #petExpand .bigAnimalInfo .bigAnimalStory .animalStory {
     line-height: 1.6;
     font-weight: normal; }
-  #signedInContent #petExpand .memberDonation *.crossout {
-    text-decoration: line-through; }
-  #signedInContent #petExpand .memberDonation #donationFormLogginIn {
-    display: grid;
-    height: 100%; }
-    #signedInContent #petExpand .memberDonation #donationFormLogginIn h3 {
-      padding: 10px; }
-    #signedInContent #petExpand .memberDonation #donationFormLogginIn .timeSlots {
-      padding-bottom: 40px; }
-    #signedInContent #petExpand .memberDonation #donationFormLogginIn #donationBtn {
-      font-size: 13px;
-      font-family: "Raleway", sans-serif;
-      height: 40px;
-      justify-self: end;
-      padding: 7px;
-      margin: 11px 0;
-      width: 150px;
-      background-color: #74b7a5;
-      border: none;
-      color: white;
-      text-align: center;
-      text-decoration: none;
-      border-radius: 40px;
-      cursor: pointer;
-      align-self: end; }
-      #signedInContent #petExpand .memberDonation #donationFormLogginIn #donationBtn:hover {
-        background-color: #599686; }
+  #signedInContent #petExpand .memberDonation {
+    border: 3px solid #ead8a6;
+    padding: 30px;
+    border-radius: 30px; }
+    #signedInContent #petExpand .memberDonation *.crossout {
+      text-decoration: line-through; }
+    #signedInContent #petExpand .memberDonation #donationFormLogginIn {
+      display: grid;
+      height: 100%; }
+      #signedInContent #petExpand .memberDonation #donationFormLogginIn h3 {
+        padding: 10px; }
+      #signedInContent #petExpand .memberDonation #donationFormLogginIn .timeSlots {
+        padding-bottom: 40px; }
+      #signedInContent #petExpand .memberDonation #donationFormLogginIn #donationBtn {
+        font-size: 13px;
+        font-family: "Raleway", sans-serif;
+        height: 40px;
+        justify-self: end;
+        padding: 7px;
+        margin: 11px 0;
+        width: 150px;
+        background-color: #74b7a5;
+        border: none;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 40px;
+        cursor: pointer;
+        align-self: end; }
+        #signedInContent #petExpand .memberDonation #donationFormLogginIn #donationBtn:hover {
+          background-color: #599686; }
   #signedInContent #petExpand .closeExpandBtn {
     cursor: pointer;
     position: absolute;

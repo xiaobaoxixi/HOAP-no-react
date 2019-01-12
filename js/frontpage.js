@@ -110,7 +110,7 @@ function pickContent() {
     user.subscribe = subscribe;
     getUserSetting(userEmail);
     console.log("from session");
-    getUserNewsfeed(subscribe);
+    //    getUserNewsfeed(subscribe);
     getUserDonationSofar(userEmail);
     getUserAnimals(userEmail);
   }
@@ -189,7 +189,7 @@ function startUserSession(email) {
           window.sessionStorage.setItem(key, Object.values(user)[i]);
         });
       });
-      getUserNewsfeed(user.subscribe);
+      //      getUserNewsfeed(user.subscribe);
     });
   newsFeedContent.innerHTML = "";
   resetForm(userSettingForm);
@@ -210,7 +210,7 @@ function signinUser(e) {
     .signInWithEmailAndPassword(signinEmail.value, signinPassword.value)
     .then(() => {
       toggleElements(loginForm);
-      clearElements(feedbackMsgS);
+      //      clearElements(feedbackMsgS);
       startUserSession(signinEmail.value);
       scrollToTop();
     })
@@ -265,7 +265,7 @@ function signout(e, arr) {
       if (!arr) {
         toggleElements(userSettings);
       }
-      clearElements(feedbackMsgS);
+      //clearElements(feedbackMsgS);
       scrollToTop();
     })
     .catch(function(error) {
@@ -983,11 +983,11 @@ function showArrayElements(array) {
   });
 }
 
-function clearElements(array) {
-  array.forEach(ele => {
-    ele.textContent = "";
-  });
-}
+// function clearElements(array) {
+//   array.forEach(ele => {
+//     ele.textContent = "";
+//   });
+// }
 
 function showElement(ele) {
   ele.classList.add("shownContent");
@@ -1030,8 +1030,14 @@ function syncNrWithRange(form, element) {
 }
 
 function showFeedback(form, error, color) {
-  form.querySelector(".feedbackMsg").textContent = error;
-  form.querySelector(".feedbackMsg").style.color = color;
+  let feedback = document.createElement("div");
+  feedback.classList.add("feedbackMsg");
+  feedback.textContent = error;
+  feedback.style.color = color;
+  form.appendChild(feedback);
+  setTimeout(() => {
+    document.querySelector(".feedbackMsg").remove();
+  }, 1500);
 }
 
 function appendEachAnimal(array, userEmail) {

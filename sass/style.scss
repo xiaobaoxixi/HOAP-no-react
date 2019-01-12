@@ -49,7 +49,7 @@ body {
     bottom: 20px;
     width: 100%;
     height: auto;
-    padding: 0 40px;
+    padding: 10px 40px;
     font-size: 0.8em;
   }
 }
@@ -500,7 +500,7 @@ button:focus {
 ------------------------*/
 #intro {
   padding-top: 60px;
-  background-color: #ead8a6;
+  background-color: $mainColor;
   width: 100%;
   height: 100vh;
   display: grid;
@@ -820,7 +820,7 @@ button:focus {
     width: 100%;
     color: $brownColor;
     padding: 5vw 10vw 0 10vw;
-    background-color: #ead8a6;
+    background-color: $mainColor;
     h2 {
       padding-bottom: 20px;
     }
@@ -979,6 +979,9 @@ button:focus {
     .storyAndExtra {
     }
     .memberDonation {
+      border: 3px solid $mainColor;
+      padding: 30px;
+      border-radius: 30px;
       *.crossout {
         text-decoration: line-through;
       }
