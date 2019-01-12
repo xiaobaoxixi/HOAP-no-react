@@ -36,7 +36,7 @@ body {
     padding: 10px 40px;
     font-size: 0.8em; }
 
-input:not([type="checkbox"]) {
+input:not([type="checkbox"]):not([type="range"]) {
   width: 100%;
   background: none;
   font-size: 1em;
@@ -47,10 +47,10 @@ input:not([type="checkbox"]) {
   border-radius: 0;
   padding: 0;
   cursor: text; }
-  input:not([type="checkbox"]):focus {
+  input:not([type="checkbox"]):not([type="range"]):focus {
     outline: 0;
     border-bottom: 1px solid #599686; }
-  input:not([type="checkbox"]).inline {
+  input:not([type="checkbox"]):not([type="range"]).inline {
     width: 5ch; }
 
 input:placeholder-shown + label {
