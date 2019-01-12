@@ -111,15 +111,17 @@ function pickContent() {
   //// use session as a medium to pass info with page reload
   //// signin and signup will lead to startUserSession
   if (window.sessionStorage.getItem("userEmail")) {
+    console.log("from session");
     const userEmail = window.sessionStorage.getItem("userEmail");
     const subscribe = window.sessionStorage.getItem("subscribe");
-    user.userEmail = userEmail;
-    user.subscribe = subscribe;
-    getUserSetting(userEmail);
-    console.log("from session");
-    //    getUserNewsfeed(subscribe);
-    getUserDonationSofar(userEmail);
-    getUserAnimals(userEmail);
+    if (userEmail !== "admin@admin.com") {
+      user.userEmail = userEmail;
+      user.subscribe = subscribe;
+      getUserSetting(userEmail);
+      //    getUserNewsfeed(subscribe);
+      getUserDonationSofar(userEmail);
+      getUserAnimals(userEmail);
+    }
   }
 }
 
@@ -1127,7 +1129,11 @@ function appendEachAnimal(array, userEmail) {
     let animalArrow = document.createElement("div");
     animalArrow.classList.add("triangleUp");
     let animalImg = document.createElement("img");
-    animalImg.setAttribute("src", entry.data().file);
+    if (entry.data().file) {
+      animalImg.setAttribute("src", entry.data().file);
+    } else {
+      animalImg.setAttribute("src", "img/animals/newcomer.png");
+    }
     // due to Firebase storage quota limit, we decided to not to use images stored in Firebase
     ////////////////////////////////////////////////////////////
     // if (data.file !== undefined && data.file !== "") {
@@ -1234,6 +1240,7 @@ specific display functions
 
 // Click left/right arrow to browse through animals
 function moveAnimals() {
+  console.log("move");
   const leftKey = document.querySelector("#animalArrowLeft");
   const rightKey = document.querySelector("#animalArrowRight");
 

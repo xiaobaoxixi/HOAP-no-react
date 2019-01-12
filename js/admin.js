@@ -24,9 +24,15 @@ const membersTamplate = document.querySelector(".membersTemplate").content;
 // date related
 const today = new Date();
 const year = today.getFullYear().toString();
-const month = (today.getMonth() + 1).toString();
-const day = today.getDate().toString();
-const timestamp = today.getTime();
+const month =
+  today.getMonth() + 1 > 9
+    ? (today.getMonth() + 1).toString()
+    : "0" + (today.getMonth() + 1).toString();
+const day =
+  today.getDate() + 1 > 9
+    ? today.getDate().toString()
+    : "0" + (today.getDate() + 1).toString();
+//const timestamp = today.getTime();
 date.textContent = `${year}-${month}-${day}`;
 
 // custom variables
@@ -34,8 +40,6 @@ let filename;
 let file;
 // displayed animal array, use this for update animal list without re-render the whole list AND without using firebases's built-in onchange function
 let animalArray = [];
-
-//window.addEventListener("DOMContentLoaded", displayAnimals);
 
 // GET animals from db and generate animal columns
 function displayAnimals() {
@@ -97,7 +101,6 @@ function buildAnimalColumn(entry) {
     .then(res => {
       res.docs.forEach(doc => {
         if (!doc.data().month && !doc.data().year && !doc.data().day) {
-          console.log(doc.data());
           ///////////////////// need to DRY these
           if (doc.data().morning === false) {
             let row = document.createElement("div");
@@ -234,30 +237,24 @@ function buildAnimalColumn(entry) {
               const afternoon = doc.data().afternoon;
               const evening = doc.data().evening;
               const training = doc.data().training;
-              const matchingAnimal = document.querySelector(
-                `div[data-id="${animalID}"]`
-              );
-              if (morning && matchingAnimal.querySelector(".morningByWhom")) {
-                matchingAnimal.querySelector(
-                  ".morningByWhom"
+              if (morning) {
+                document.querySelector(
+                  `div[data-id="${animalID}"] .morningByWhom`
                 ).textContent = user;
               }
-              if (
-                afternoon &&
-                matchingAnimal.querySelector(".afternoonByWhom")
-              ) {
-                matchingAnimal.querySelector(
-                  ".afternoonByWhom"
+              if (afternoon) {
+                document.querySelector(
+                  `div[data-id="${animalID}"] .afternoonByWhom`
                 ).textContent = user;
               }
-              if (evening && matchingAnimal.querySelector(".eveningByWhom")) {
-                matchingAnimal.querySelector(
-                  ".eveningByWhom"
+              if (evening) {
+                document.querySelector(
+                  `div[data-id="${animalID}"] .eveningByWhom`
                 ).textContent = user;
               }
-              if (training && matchingAnimal.querySelector(".trainingByWhom")) {
-                matchingAnimal.querySelector(
-                  ".trainingByWhom"
+              if (training) {
+                document.querySelector(
+                  `div[data-id="${animalID}"] .trainingByWhom`
                 ).textContent = user;
               }
             });
@@ -294,7 +291,7 @@ function getFilename(evt) {
 }
 
 //add animal to db, including image file
-addAnimalToDbBtn.addEventListener("click", e => {
+addAnimalForm.addEventListener("submit", e => {
   e.preventDefault();
   //add to the specific collection in firestore
   db.collection("animals")
@@ -309,8 +306,8 @@ addAnimalToDbBtn.addEventListener("click", e => {
       young: addAnimalForm.young.checked ? true : false,
       pregnant: addAnimalForm.pregnant.checked ? true : false,
       money: addAnimalForm.money.value,
-      story: addAnimalForm.story.value,
-      file: addAnimalForm.filename.value
+      story: addAnimalForm.story.value
+      //      file: addAnimalForm.filename.value
     })
     .then(docRef => {
       const newlyAddedAnimalID = docRef.id;
@@ -323,7 +320,7 @@ addAnimalToDbBtn.addEventListener("click", e => {
         afternoon: addAnimalForm.afternoon.checked ? true : false,
         evening: addAnimalForm.evening.checked ? true : false,
         training: addAnimalForm.training.checked ? true : false,
-        extra: addAnimalForm.extra.value
+        extra: addAnimalForm.extra.value || ""
       });
       resetForm(addAnimalForm);
       // re run displayAnimals to update columns
@@ -401,24 +398,8 @@ deleteAnimalBtn.addEventListener("click", e => {
   document.querySelector(`.column[data-id='${id}']`).remove();
 });
 
-/********************
- * shared functions
- ********************/
-
-// reset form, moved to frontpage.js
-// function resetForm(form) {
-//   const allFormELements = form.querySelectorAll("*");
-//   allFormELements.forEach(e => {
-//     e.value = "";
-//     if (e.checked) {
-//       e.checked = false;
-//     }
-//   });
-// }
-
-let bigImage = document.createElement("img");
-
 // display animal details
+let bigImage = document.createElement("img");
 function showAnimalDetail(data, id, elem, editableBol) {
   const src = document
     .querySelector(`.column[data-id = "${id}"] .animalImage img`)
@@ -457,9 +438,11 @@ function showAnimalDetail(data, id, elem, editableBol) {
       .querySelector(`input[name='pregnant']`)
       .setAttribute("checked", "checked");
   }
-  elem
-    .querySelector(`input[value='${data.gender}']`)
-    .setAttribute("checked", "checked");
+  if (data.gender) {
+    elem
+      .querySelector(`input[value='${data.gender}']`)
+      .setAttribute("checked", "checked");
+  }
   // elem
   //   .querySelector(`input[value='${data.size}']`)
   //   .setAttribute("checked", "checked");
@@ -512,133 +495,135 @@ function closeModal() {
   animalDetailModal.classList.add("hide");
 }
 
-// GET members details from db and generate the table of members
-let sum = 0;
-let time = 0;
-let stuff = 0;
-let maxMoneyDonation = 0;
-let maxTimeDonation = 0;
-let maxStuffDonation = 0;
+function getMemberStatus() {
+  // GET members details from db and generate the table of members
+  let sum = 0;
+  let time = 0;
+  let stuff = 0;
+  let maxMoneyDonation = 0;
+  let maxTimeDonation = 0;
+  let maxStuffDonation = 0;
 
-// find max of money donations
-db.collection("moneyDonation")
-  .get()
-  .then(res => {
-    res.forEach(doc => {
-      if (doc.data().amount > maxMoneyDonation) {
-        maxMoneyDonation = doc.data().amount;
-      }
-    });
-    db.collection("member")
-      .get()
-      .then(res => {
-        res.forEach(doc => {
-          const userEmail = doc.data().email;
-          if (userEmail !== "admin@admin.com") {
-            let clone = membersTamplate.cloneNode(true);
-            clone
-              .querySelector(".singleMember")
-              .setAttribute("data-email", userEmail);
-            clone.querySelector(".emailBox").textContent = userEmail;
-            document
-              .querySelector(".donationsTableContainer")
-              .appendChild(clone);
-            // check money donation from each user
-            db.collection("moneyDonation")
-              .where("userEmail", "==", userEmail)
-              .get()
-              .then(res => {
-                if (res.docs.length > 0) {
-                  res.forEach(eachMemberDonationSum => {
-                    sum = Number(eachMemberDonationSum.data().amount);
-                    document.querySelector(
-                      `.singleMember[data-email='${userEmail}'] #moneyDonation p`
-                    ).textContent = sum + " kr.";
-                    document.querySelector(
-                      `.singleMember[data-email='${userEmail}'] #moneyDonation`
-                    ).style.width = (100 * sum) / maxMoneyDonation + "%";
-                  });
-                }
-              });
-          }
-        });
+  // find max of money donations
+  db.collection("moneyDonation")
+    .get()
+    .then(res => {
+      res.forEach(doc => {
+        if (doc.data().amount > maxMoneyDonation) {
+          maxMoneyDonation = doc.data().amount;
+        }
       });
-  });
-
-// find max of time donations
-db.collection("timeDonation")
-  .get()
-  .then(res => {
-    res.forEach(doc => {
-      if (doc.data().time > maxTimeDonation) {
-        maxTimeDonation = doc.data().time;
-      }
-    });
-    db.collection("member")
-      .get()
-      .then(res => {
-        res.forEach(doc => {
-          const userEmail = doc.data().email;
-          if (userEmail !== "admin@admin.com") {
-            // check money donation from each user
-            db.collection("timeDonation")
-              .where("userEmail", "==", userEmail)
-              .get()
-              .then(res => {
-                if (res.docs.length > 0) {
-                  res.forEach(eachMemberDonationSum => {
-                    time = Number(eachMemberDonationSum.data().time);
-                    if (time === 1) {
+      db.collection("member")
+        .get()
+        .then(res => {
+          res.forEach(doc => {
+            const userEmail = doc.data().email;
+            if (userEmail !== "admin@admin.com") {
+              let clone = membersTamplate.cloneNode(true);
+              clone
+                .querySelector(".singleMember")
+                .setAttribute("data-email", userEmail);
+              clone.querySelector(".emailBox").textContent = userEmail;
+              document
+                .querySelector(".donationsTableContainer")
+                .appendChild(clone);
+              // check money donation from each user
+              db.collection("moneyDonation")
+                .where("userEmail", "==", userEmail)
+                .get()
+                .then(res => {
+                  if (res.docs.length > 0) {
+                    res.forEach(eachMemberDonationSum => {
+                      sum = Number(eachMemberDonationSum.data().amount);
                       document.querySelector(
-                        `.singleMember[data-email='${userEmail}'] #timeDonation p`
-                      ).textContent = time + " hour";
-                    } else if (time > 1) {
+                        `.singleMember[data-email='${userEmail}'] #moneyDonation p`
+                      ).textContent = sum + " kr.";
                       document.querySelector(
-                        `.singleMember[data-email='${userEmail}'] #timeDonation p`
-                      ).textContent = time + " hours";
-                    }
-                    document.querySelector(
-                      `.singleMember[data-email='${userEmail}'] #timeDonation`
-                    ).style.width = (100 * time) / maxTimeDonation + "%";
-                  });
-                }
-              });
-          }
-        });
-      });
-  });
-
-// find max of stuff donations
-db.collection("member")
-  .get()
-  .then(res => {
-    res.forEach(doc => {
-      const userEmail = doc.data().email;
-      if (userEmail !== "admin@admin.com") {
-        db.collection("stuffDonation")
-          .where("userEmail", "==", userEmail)
-          .get()
-          .then(res => {
-            stuff = res.docs.length;
-            if (stuff > maxStuffDonation) {
-              maxStuffDonation = stuff;
+                        `.singleMember[data-email='${userEmail}'] #moneyDonation`
+                      ).style.width = (100 * sum) / maxMoneyDonation + "%";
+                    });
+                  }
+                });
             }
-            if (stuff === 1) {
-              document.querySelector(
-                `.singleMember[data-email='${userEmail}'] #stuffDonation p`
-              ).textContent = stuff + " piece";
-            } else if (stuff > 1) {
-              document.querySelector(
-                `.singleMember[data-email='${userEmail}'] #stuffDonation p`
-              ).textContent = stuff + " pieces";
-            }
-            document.querySelector(
-              `.singleMember[data-email='${userEmail}'] #stuffDonation`
-            ).style.width = (100 * stuff) / maxStuffDonation + "%";
           });
-      }
+        });
     });
-  });
+
+  // find max of time donations
+  db.collection("timeDonation")
+    .get()
+    .then(res => {
+      res.forEach(doc => {
+        if (doc.data().time > maxTimeDonation) {
+          maxTimeDonation = doc.data().time;
+        }
+      });
+      db.collection("member")
+        .get()
+        .then(res => {
+          res.forEach(doc => {
+            const userEmail = doc.data().email;
+            if (userEmail !== "admin@admin.com") {
+              // check money donation from each user
+              db.collection("timeDonation")
+                .where("userEmail", "==", userEmail)
+                .get()
+                .then(res => {
+                  if (res.docs.length > 0) {
+                    res.forEach(eachMemberDonationSum => {
+                      time = Number(eachMemberDonationSum.data().time);
+                      if (time === 1) {
+                        document.querySelector(
+                          `.singleMember[data-email='${userEmail}'] #timeDonation p`
+                        ).textContent = time + " hour";
+                      } else if (time > 1) {
+                        document.querySelector(
+                          `.singleMember[data-email='${userEmail}'] #timeDonation p`
+                        ).textContent = time + " hours";
+                      }
+                      document.querySelector(
+                        `.singleMember[data-email='${userEmail}'] #timeDonation`
+                      ).style.width = (100 * time) / maxTimeDonation + "%";
+                    });
+                  }
+                });
+            }
+          });
+        });
+    });
+
+  // find max of stuff donations
+  db.collection("member")
+    .get()
+    .then(res => {
+      res.forEach(doc => {
+        const userEmail = doc.data().email;
+        if (userEmail !== "admin@admin.com") {
+          db.collection("stuffDonation")
+            .where("userEmail", "==", userEmail)
+            .get()
+            .then(res => {
+              stuff = res.docs.length;
+              if (stuff > maxStuffDonation) {
+                maxStuffDonation = stuff;
+              }
+              if (stuff === 1) {
+                document.querySelector(
+                  `.singleMember[data-email='${userEmail}'] #stuffDonation p`
+                ).textContent = stuff + " piece";
+              } else if (stuff > 1) {
+                document.querySelector(
+                  `.singleMember[data-email='${userEmail}'] #stuffDonation p`
+                ).textContent = stuff + " pieces";
+              }
+              document.querySelector(
+                `.singleMember[data-email='${userEmail}'] #stuffDonation`
+              ).style.width = (100 * stuff) / maxStuffDonation + "%";
+            });
+        }
+      });
+    });
+}
 
 // show image in 3x3 section
 const imageContainer = document.querySelector(".receviedPictures");
@@ -680,7 +665,7 @@ db.collection("imagesFromAdmin")
               fileArray.push(needToPublishFile);
             }
           });
-          console.log(fileArray);
+          //console.log(fileArray);
           // POST files to db
           fileArray.forEach(eachfile => {
             db.collection("frontpageImages")
@@ -739,145 +724,150 @@ document.querySelector(".staffCost").textContent = staffCost;
 document.querySelector(".fixCost").textContent =
   waterCost + elCost + heatCost + staffCost;
 // animal cost
-let catCost = 0;
-let dogCost = 0;
-db.collection("animals")
-  .get()
-  .then(res => {
-    res.forEach(doc => {
-      if (doc.data().type === "cat") {
-        catCost += Number(doc.data().money);
-      }
-    });
-    document.querySelector(".catCost").textContent = catCost;
-    //    document.querySelector(".totalAnimalCost").textContent = catCost + dogCost;
-    db.collection("animals")
-      .get()
-      .then(res => {
-        res.forEach(doc => {
-          if (doc.data().type === "dog") {
-            dogCost += Number(doc.data().money);
-          }
-        });
-        document.querySelector(".dogCost").textContent = dogCost;
-        document.querySelector(".totalAnimalCost").textContent =
-          catCost + dogCost;
-      });
-    // donation gain is the sum of all donation made by both member and visitors what's not registered as member
-    let donationGain = 0;
-    let monthlyDonationGain = 0;
-    db.collection("moneyDonation")
-      .get()
-      .then(res => {
-        res.forEach(doc => {
-          const eachAmount = doc.data().amount;
-          donationGain += Number(eachAmount);
-        });
-        document.querySelector(".donationGain").textContent = donationGain;
-        // monthly donation from member
-        db.collection("member")
-          .get()
-          .then(res => {
-            res.forEach(doc => {
-              const monthlyDonation = doc.data().monthlyDonation;
-              if (monthlyDonation) {
-                monthlyDonationGain += Number(monthlyDonation);
-              }
-            });
-            document.querySelector(
-              ".monthlyDonationGain"
-            ).textContent = monthlyDonationGain;
-            const result =
-              monthlyDonationGain -
-              waterCost -
-              elCost -
-              heatCost -
-              staffCost -
-              catCost -
-              dogCost;
-            document.querySelector(".result").textContent = result;
-            if (result < 0) {
-              document.querySelector(".hint i").textContent =
-                "didn't raise enough money this month to cover the cost, must use reserve.";
-            }
-          });
-      });
-  });
-// count animals
-let catCount = 0;
-let dogCount = 0;
-let memberCount = 0;
-db.collection("animals")
-  .get()
-  .then(res => {
-    res.forEach(doc => {
-      if (doc.data().type === "cat") {
-        catCount += 1;
-      } else if (doc.data().type === "dog") {
-        dogCount += 1;
-      }
-    });
-    document.querySelector(".catCount").textContent = catCount;
-    document.querySelector(".dogCount").textContent = dogCount;
-    db.collection("member")
-      .get()
-      .then(res => {
-        res.forEach(doc => {
-          memberCount += 1;
-        });
-        let statisArray = [
-          ["month", "cats", "dogs", "members"],
-          ["Jan", 8, 7, 20],
-          ["Feb", 7, 6, 18],
-          ["Mar", 8, 6, 19],
-          ["Apr", 8, 7, 19],
-          ["May", 7, 9, 20],
-          ["Jun", 7, 9, 21],
-          ["Jul", 6, 6, 21],
-          ["Aug", 7, 6, 22],
-          ["Sep", 7, 7, 20],
-          ["Oct", 8, 8, 19],
-          ["Nov", 9, 8, 21]
-        ];
-        statisArray.push(["Dec", catCount, dogCount, memberCount]);
-        document.querySelector(".memberCount").textContent = memberCount;
-
-        // statistic chart
-        // https://developers.google.com/chart/interactive/docs/gallery/linechart
-        google.charts.load("current", { packages: ["corechart"] });
-        google.charts.setOnLoadCallback(drawChart);
-        function drawChart() {
-          let data = google.visualization.arrayToDataTable(statisArray);
-
-          let options = {
-            // title: "Pets montly situation",
-            curveType: "function",
-            legend: { position: "bottom" },
-            colors: ["#ead8a6", "#c18e63", "#74b7a5"],
-            lineWidth: 3,
-            chartArea: {
-              left: 20,
-              top: 20,
-              width: "100%"
-            }
-          };
-
-          let chart = new google.visualization.LineChart(
-            document.getElementById("curve_chart")
-          );
-
-          chart.draw(data, options);
+function calcAnimalCost() {
+  console.log("calc animal cost");
+  let catCost = 0;
+  let dogCost = 0;
+  db.collection("animals")
+    .get()
+    .then(res => {
+      res.forEach(doc => {
+        if (doc.data().type === "cat") {
+          catCost += Number(doc.data().money);
         }
       });
-  });
+      document.querySelector(".catCost").textContent = catCost;
+      //    document.querySelector(".totalAnimalCost").textContent = catCost + dogCost;
+      db.collection("animals")
+        .get()
+        .then(res => {
+          res.forEach(doc => {
+            if (doc.data().type === "dog") {
+              dogCost += Number(doc.data().money);
+            }
+          });
+          document.querySelector(".dogCost").textContent = dogCost;
+          document.querySelector(".totalAnimalCost").textContent =
+            catCost + dogCost;
+        });
+      // donation gain is the sum of all donation made by both member and visitors what's not registered as member
+      let donationGain = 0;
+      let monthlyDonationGain = 0;
+      db.collection("moneyDonation")
+        .get()
+        .then(res => {
+          res.forEach(doc => {
+            const eachAmount = doc.data().amount;
+            donationGain += Number(eachAmount);
+          });
+          document.querySelector(".donationGain").textContent = donationGain;
+          // monthly donation from member
+          db.collection("member")
+            .get()
+            .then(res => {
+              res.forEach(doc => {
+                const monthlyDonation = doc.data().monthlyDonation;
+                if (monthlyDonation) {
+                  monthlyDonationGain += Number(monthlyDonation);
+                }
+              });
+              document.querySelector(
+                ".monthlyDonationGain"
+              ).textContent = monthlyDonationGain;
+              const result =
+                monthlyDonationGain -
+                waterCost -
+                elCost -
+                heatCost -
+                staffCost -
+                catCost -
+                dogCost;
+              document.querySelector(".result").textContent = result;
+              if (result < 0) {
+                document.querySelector(".hint i").textContent =
+                  "didn't raise enough money this month to cover the cost, must use reserve.";
+              }
+            });
+        });
+    });
+}
 
-//////////////////////////////
+function countAnimals() {
+  // count animals
+  let catCount = 0;
+  let dogCount = 0;
+  let memberCount = 0;
+  db.collection("animals")
+    .get()
+    .then(res => {
+      res.forEach(doc => {
+        if (doc.data().type === "cat") {
+          catCount += 1;
+        } else if (doc.data().type === "dog") {
+          dogCount += 1;
+        }
+      });
+      document.querySelector(".catCount").textContent = catCount;
+      document.querySelector(".dogCount").textContent = dogCount;
+      db.collection("member")
+        .get()
+        .then(res => {
+          res.forEach(doc => {
+            memberCount += 1;
+          });
+          let statisArray = [
+            ["month", "cats", "dogs", "members"],
+            ["Jan", 8, 7, 20],
+            ["Feb", 7, 6, 18],
+            ["Mar", 8, 6, 19],
+            ["Apr", 8, 7, 19],
+            ["May", 7, 9, 20],
+            ["Jun", 7, 9, 21],
+            ["Jul", 6, 6, 21],
+            ["Aug", 7, 6, 22],
+            ["Sep", 7, 7, 20],
+            ["Oct", 8, 8, 19],
+            ["Nov", 9, 8, 21]
+          ];
+          statisArray.push(["Dec", catCount, dogCount, memberCount]);
+          document.querySelector(".memberCount").textContent = memberCount;
+
+          // statistic chart
+          // https://developers.google.com/chart/interactive/docs/gallery/linechart
+          google.charts.load("current", { packages: ["corechart"] });
+          google.charts.setOnLoadCallback(drawChart);
+          function drawChart() {
+            let data = google.visualization.arrayToDataTable(statisArray);
+
+            let options = {
+              // title: "Pets montly situation",
+              curveType: "function",
+              legend: { position: "bottom" },
+              colors: ["#ead8a6", "#c18e63", "#74b7a5"],
+              lineWidth: 3,
+              chartArea: {
+                left: 20,
+                top: 20,
+                width: "100%"
+              }
+            };
+
+            let chart = new google.visualization.LineChart(
+              document.getElementById("curve_chart")
+            );
+
+            chart.draw(data, options);
+          }
+        });
+    });
+}
 /*--------------------------------------
-Intersection observer on the admin sidebar menu
+Intersection observer on the admin page
 -------------------------------------*/
 
 //get sections from the DOM
 const dailyTasksSection = document.querySelector(".animalTasks");
+const toDoListSection = document.querySelector(".otherToDo");
 const dailyTasksAnchor = document.querySelector("aside ul li:nth-child(1) a");
 const postAndNotifySection = document.querySelector(".postBtn");
 const postAndNotifyAnchor = document.querySelector(
@@ -886,50 +876,45 @@ const postAndNotifyAnchor = document.querySelector(
 const statusSection = document.querySelector(".listOfDonations");
 const statusAnchor = document.querySelector("aside ul li:nth-child(3) a");
 
-//Observe daily tasks section
-let observerDailyTasks = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.intersectionRatio > 0) {
-      dailyTasksAnchor.classList.add("activeAnchor");
-      //postAndNotifyAnchor.classList.remove("activeAnchor");
-    } else {
-      dailyTasksAnchor.classList.remove("activeAnchor");
-    }
-  });
-});
+let options0 = {
+  root: null,
+  rootMargin: "0px",
+  threshold: 0
+};
+let options20 = {
+  root: null,
+  rootMargin: "0px",
+  threshold: 0.2
+};
+let observerDailyTasks = new IntersectionObserver(showDailyTask, options0);
+let observerToDoList = new IntersectionObserver(showDailyTask, options20);
+let observerPostNotify = new IntersectionObserver(showPostNotify, options20);
+let observerStatus = new IntersectionObserver(showStatus, options20);
 
 observerDailyTasks.observe(dailyTasksSection);
+observerToDoList.observe(toDoListSection);
+observerPostNotify.observe(postAndNotifySection);
+observerStatus.observe(statusSection);
 
-//Observe post and notify section
-let postAndNotifyobserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.intersectionRatio > 0) {
-      postAndNotifyAnchor.classList.add("activeAnchor");
-      //dailyTasksAnchor.classList.remove("activeAnchor");
-      //statusAnchor.classList.remove("activeAnchor");
-    } else {
-      postAndNotifyAnchor.classList.remove("activeAnchor");
-    }
-  });
-});
+function showDailyTask() {
+  dailyTasksAnchor.classList.add("activeAnchor");
+  postAndNotifyAnchor.classList.remove("activeAnchor");
+  statusAnchor.classList.remove("activeAnchor");
+}
+function showPostNotify() {
+  dailyTasksAnchor.classList.remove("activeAnchor");
+  postAndNotifyAnchor.classList.add("activeAnchor");
+  statusAnchor.classList.remove("activeAnchor");
+}
+function showStatus() {
+  dailyTasksAnchor.classList.remove("activeAnchor");
+  postAndNotifyAnchor.classList.remove("activeAnchor");
+  statusAnchor.classList.add("activeAnchor");
+  calcAnimalCost();
+  getMemberStatus();
+  countAnimals();
+}
 
-postAndNotifyobserver.observe(postAndNotifySection);
-
-//Observe status section
-let statusObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.intersectionRatio > 0) {
-      statusAnchor.classList.add("activeAnchor");
-      //postAndNotifyAnchor.classList.remove("activeAnchor");
-    } else {
-      statusAnchor.classList.remove("activeAnchor");
-    }
-  });
-});
-
-statusObserver.observe(statusSection);
-
-//////////////  admin page
 /*-------------------------------------------
 Render tasks from database into website 
 --------------------------------------------*/
@@ -963,7 +948,7 @@ function renderTask(doc) {
 }
 
 /*-------------------------------------------
-                Add to do task
+Add to-do task
 ------------------------------------------*/
 
 const toDoBtn = document.querySelector(".addToDoBtn");
@@ -980,7 +965,7 @@ toDoBtn.addEventListener("click", e => {
 });
 
 /*-------------------------------------------
-               live updates
+live update to-do-list
 ------------------------------------------*/
 db.collection("toDoList").onSnapshot(snapshot => {
   let changes = snapshot.docChanges();
