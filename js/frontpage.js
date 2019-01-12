@@ -881,6 +881,12 @@ function getClickedAnimal(animalId) {
 
 // show animal modal including getting relevant info from db
 function showClickedAnimalModal(data, animalID) {
+  document.querySelectorAll(".eachAnimal .triangleUp").forEach(t => {
+    t.style.display = "none";
+  });
+  document.querySelector(
+    `.eachAnimal[data-id="${animalID}"] .triangleUp`
+  ).style.display = "inherit";
   const src = document
     .querySelector(`.eachAnimal[data-id="${animalID}"] img`)
     .getAttribute("src");
@@ -987,11 +993,11 @@ function showClickedAnimalModal(data, animalID) {
   petExpand.appendChild(donationClone);
   const closeExpandBtn = document.querySelector(".closeExpandBtn");
 
-  const triangleUp = document.querySelectorAll(".triangleUp");
+  const triangleUpS = document.querySelectorAll(".triangleUp");
 
   closeExpandBtn.addEventListener("click", () => {
     petExpand.style.display = "none";
-    hideArrayElements(triangleUp);
+    hideArrayElements(triangleUpS);
   });
 }
 
@@ -1199,8 +1205,8 @@ function appendEachAnimal(array, userEmail) {
             });
         }
       });
-    let statusCircle = document.createElement("div");
-    statusCircle.classList.add("statusCircle");
+    // let statusCircle = document.createElement("div");
+    // statusCircle.classList.add("statusCircle");
     animalDiv.appendChild(animalName);
     animalDiv.appendChild(animalImg);
     animalImg.addEventListener("click", e => {
@@ -1208,10 +1214,10 @@ function appendEachAnimal(array, userEmail) {
       hideElement(userSettingPanel);
       hideElement(newsFeedPanel);
       // show animal modal with triangle pointer
-      let arrows = e.target.parentElement.querySelectorAll(".triangleUp");
-      hideArrayElements(arrows);
-      e.target.parentElement.querySelector(".triangleUp").style.display =
-        "inherit";
+      // let arrows = e.target.parentElement.querySelectorAll(".triangleUp");
+      // hideArrayElements(arrows);
+      // e.target.parentElement.querySelector(".triangleUp").style.display =
+      //   "inherit";
       getClickedAnimal(entry.id);
     });
     animalDiv.appendChild(heart);
@@ -1264,6 +1270,8 @@ db.collection("notifications").onSnapshot(snapshot => {
             statusCircle.classList.remove("flash");
           });
         }
+        // by default, new notification doesn't trigger getUserNewsfeed(), it's triggered when user click on the paw
+        // but if the news panel is already open, need to run getUserNewsfeed(), since user won't click on paw at this state
         if (newsFeedPanel.classList.contains("shownContent")) {
           getUserNewsfeed(user.subscribe);
           newsStatus = false;
