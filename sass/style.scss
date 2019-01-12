@@ -1626,7 +1626,7 @@ footer {
   .activeAnchor {
     color: #b28973;
     background-color: white;
-    transition: background-color 0.7s ease;
+    transition: background-color 0.3s ease;
   }
   main {
     position: absolute;
@@ -2129,6 +2129,7 @@ footer {
         label {
           cursor: pointer;
           color: $purpleColor;
+          font-size: 13px;
         }
       }
       .postBtn {

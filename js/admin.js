@@ -870,13 +870,13 @@ db.collection("animals")
       });
   });
 
-//////////////////////////////
 /*--------------------------------------
-Intersection observer on the admin sidebar menu
+Intersection observer on the admin page
 -------------------------------------*/
 
 //get sections from the DOM
 const dailyTasksSection = document.querySelector(".animalTasks");
+const toDoListSection = document.querySelector(".otherToDo");
 const dailyTasksAnchor = document.querySelector("aside ul li:nth-child(1) a");
 const postAndNotifySection = document.querySelector(".postBtn");
 const postAndNotifyAnchor = document.querySelector(
@@ -885,50 +885,50 @@ const postAndNotifyAnchor = document.querySelector(
 const statusSection = document.querySelector(".listOfDonations");
 const statusAnchor = document.querySelector("aside ul li:nth-child(3) a");
 
-//Observe daily tasks section
-let observerDailyTasks = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.intersectionRatio > 0) {
-      dailyTasksAnchor.classList.add("activeAnchor");
-      //postAndNotifyAnchor.classList.remove("activeAnchor");
-    } else {
-      dailyTasksAnchor.classList.remove("activeAnchor");
-    }
-  });
-});
+//Observe daily tasks and to-do-list sections
+
+let options0 = {
+  root: null,
+  rootMargin: "0px",
+  threshold: 0
+};
+let options20 = {
+  root: null,
+  rootMargin: "0px",
+  threshold: 0.2
+};
+let observerDailyTasks = new IntersectionObserver(
+  hightlightDailyTask,
+  options0
+);
+let observerToDoList = new IntersectionObserver(hightlightDailyTask, options20);
+let observerPostNotify = new IntersectionObserver(
+  hightlightPostNotify,
+  options20
+);
+let observerStatus = new IntersectionObserver(hightlightStatus, options20);
 
 observerDailyTasks.observe(dailyTasksSection);
+observerToDoList.observe(toDoListSection);
+observerPostNotify.observe(postAndNotifySection);
+observerStatus.observe(statusSection);
 
-//Observe post and notify section
-let postAndNotifyobserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.intersectionRatio > 0) {
-      postAndNotifyAnchor.classList.add("activeAnchor");
-      //dailyTasksAnchor.classList.remove("activeAnchor");
-      //statusAnchor.classList.remove("activeAnchor");
-    } else {
-      postAndNotifyAnchor.classList.remove("activeAnchor");
-    }
-  });
-});
+function hightlightDailyTask() {
+  dailyTasksAnchor.classList.add("activeAnchor");
+  postAndNotifyAnchor.classList.remove("activeAnchor");
+  statusAnchor.classList.remove("activeAnchor");
+}
+function hightlightPostNotify() {
+  dailyTasksAnchor.classList.remove("activeAnchor");
+  postAndNotifyAnchor.classList.add("activeAnchor");
+  statusAnchor.classList.remove("activeAnchor");
+}
+function hightlightStatus() {
+  dailyTasksAnchor.classList.remove("activeAnchor");
+  postAndNotifyAnchor.classList.remove("activeAnchor");
+  statusAnchor.classList.add("activeAnchor");
+}
 
-postAndNotifyobserver.observe(postAndNotifySection);
-
-//Observe status section
-let statusObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.intersectionRatio > 0) {
-      statusAnchor.classList.add("activeAnchor");
-      //postAndNotifyAnchor.classList.remove("activeAnchor");
-    } else {
-      statusAnchor.classList.remove("activeAnchor");
-    }
-  });
-});
-
-statusObserver.observe(statusSection);
-
-//////////////  admin page
 /*-------------------------------------------
 Render tasks from database into website 
 --------------------------------------------*/
@@ -962,7 +962,7 @@ function renderTask(doc) {
 }
 
 /*-------------------------------------------
-                Add to do task
+Add to-do task
 ------------------------------------------*/
 
 const toDoBtn = document.querySelector(".addToDoBtn");
@@ -979,7 +979,7 @@ toDoBtn.addEventListener("click", e => {
 });
 
 /*-------------------------------------------
-               live updates
+live update to-do-list
 ------------------------------------------*/
 db.collection("toDoList").onSnapshot(snapshot => {
   let changes = snapshot.docChanges();

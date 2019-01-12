@@ -1320,7 +1320,7 @@ footer {
   #admin .activeAnchor {
     color: #b28973;
     background-color: white;
-    transition: background-color 0.7s ease; }
+    transition: background-color 0.3s ease; }
   #admin main {
     position: absolute;
     width: 85%;
@@ -1721,7 +1721,8 @@ footer {
           position: absolute; }
         #postAndNotify .postsContainer .dragAndDropContainer div label {
           cursor: pointer;
-          color: #2e2f4b; }
+          color: #2e2f4b;
+          font-size: 13px; }
       #postAndNotify .postsContainer .dragAndDropContainer .postBtn {
         margin: 30px 0px;
         width: 100%;
