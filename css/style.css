@@ -719,15 +719,18 @@ button:focus {
   background-color: #efefef;
   color: grey;
   position: relative; }
-  #signedInContent #yourPets > p > span > img {
-    width: 20px;
-    margin-left: 20px;
-    cursor: pointer;
-    vertical-align: bottom;
-    opacity: 0.3;
-    transition: all 0.2s; }
-    #signedInContent #yourPets > p > span > img:hover {
-      opacity: 1; }
+  #signedInContent #yourPets > p > span {
+    margin-left: 20px; }
+    #signedInContent #yourPets > p > span img {
+      width: 20px;
+      cursor: pointer;
+      vertical-align: bottom;
+      opacity: 0.3;
+      transition: all 0.2s; }
+      #signedInContent #yourPets > p > span img:hover {
+        opacity: 1; }
+      #signedInContent #yourPets > p > span img.active {
+        opacity: 1; }
   #signedInContent #yourPets hr {
     position: relative;
     top: -60px;

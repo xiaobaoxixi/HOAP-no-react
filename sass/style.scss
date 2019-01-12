@@ -830,15 +830,20 @@ button:focus {
     background-color: $grayColor;
     color: grey;
     position: relative;
-    & > p > span > img {
-      width: 20px;
+    & > p > span {
       margin-left: 20px;
-      cursor: pointer;
-      vertical-align: bottom;
-      opacity: 0.3;
-      transition: all 0.2s;
-      &:hover {
-        opacity: 1;
+      img {
+        width: 20px;
+        cursor: pointer;
+        vertical-align: bottom;
+        opacity: 0.3;
+        transition: all 0.2s;
+        &:hover {
+          opacity: 1;
+        }
+        &.active {
+          opacity: 1;
+        }
       }
     }
     //display: grid;
