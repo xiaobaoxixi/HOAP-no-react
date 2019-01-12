@@ -1088,24 +1088,65 @@ function appendEachAnimal(array, userEmail) {
             heart.setAttribute("alt", "empty heart icon");
           }
         });
+        heart.addEventListener("click", toggleFollow);
+        function toggleFollow() {
+          const heartType = heart.getAttribute("src");
+          const animalID = entry.id;
+          if (heartType.indexOf("filled") > -1) {
+            heart.setAttribute("src", "img/icons/emptyheart.png");
+            unfollowAnimal(entry.id, user.userEmail);
+          } else {
+            heart.setAttribute("src", "img/icons/filledheart.png");
+            followAnimal(entry.id, user.userEmail);
+          }
+        }
+        function unfollowAnimal(animal, user) {
+          db.collection("member")
+            .where("email", "==", user)
+            .get()
+            .then(res => {
+              res.forEach(user => {
+                db.collection("member")
+                  .doc(user.id)
+                  .update({
+                    following: firebase.firestore.FieldValue.arrayRemove(animal)
+                  });
+              });
+            });
+        }
+        function followAnimal(animal, user) {
+          db.collection("member")
+            .where("email", "==", user)
+            .get()
+            .then(res => {
+              res.forEach(user => {
+                db.collection("member")
+                  .doc(user.id)
+                  .update({
+                    following: firebase.firestore.FieldValue.arrayUnion(animal)
+                  });
+              });
+            });
+        }
       });
     let statusCircle = document.createElement("div");
     statusCircle.classList.add("statusCircle");
     animalDiv.appendChild(animalName);
     animalDiv.appendChild(animalImg);
-    animalDiv.appendChild(heart);
-    animalDiv.appendChild(statusCircle);
-    animalDiv.appendChild(animalArrow);
-    animalDiv.addEventListener("click", e => {
+    animalImg.addEventListener("click", e => {
       // hide side panel if present
       hideElement(userSettingPanel);
       hideElement(newsFeedPanel);
       // show animal modal with triangle pointer
       let arrows = e.target.parentElement.querySelectorAll(".triangleUp");
       hideArrayElements(arrows);
-      e.target.querySelector(".triangleUp").style.display = "inherit";
+      e.target.parentElement.querySelector(".triangleUp").style.display =
+        "inherit";
       getClickedAnimal(entry.id);
     });
+    animalDiv.appendChild(heart);
+    animalDiv.appendChild(statusCircle);
+    animalDiv.appendChild(animalArrow);
     animalListOnLoggedIn.appendChild(animalDiv);
   });
   moveAnimals();
