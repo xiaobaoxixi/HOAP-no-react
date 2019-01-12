@@ -715,7 +715,7 @@ button:focus {
     padding-bottom: 20px; }
 
 #signedInContent #yourPets {
-  padding: 150px 10vw 0 10vw;
+  padding: 100px 10vw 0 10vw;
   background-color: #efefef;
   color: grey;
   position: relative; }
@@ -805,15 +805,15 @@ button:focus {
   bottom: -88px;
   width: 0;
   height: 0;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-bottom: 20px solid white; }
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid white; }
 
 #signedInContent #petExpand {
   color: #716f6f;
   width: 100%;
   height: auto;
-  padding: 60px 50px;
+  padding: 60px 10vw;
   background-color: white;
   grid-column: 1/-1;
   z-index: 2;
@@ -844,7 +844,7 @@ button:focus {
     font-weight: normal; }
   #signedInContent #petExpand .memberDonation {
     border: 3px solid #ead8a6;
-    padding: 30px;
+    padding: 20px;
     border-radius: 30px; }
     #signedInContent #petExpand .memberDonation *.crossout {
       text-decoration: line-through; }
@@ -854,7 +854,9 @@ button:focus {
       #signedInContent #petExpand .memberDonation #donationFormLogginIn h3 {
         padding: 10px; }
       #signedInContent #petExpand .memberDonation #donationFormLogginIn .timeSlots {
-        padding-bottom: 40px; }
+        padding-bottom: 30px; }
+        #signedInContent #petExpand .memberDonation #donationFormLogginIn .timeSlots p {
+          padding: 10px 20px 0 10px; }
       #signedInContent #petExpand .memberDonation #donationFormLogginIn #donationBtn {
         font-size: 13px;
         font-family: "Raleway", sans-serif;
