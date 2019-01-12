@@ -9,6 +9,9 @@ const user = {
 };
 
 let newsStatus = false;
+let onlyFollow = false;
+let onlyCat = false;
+let onlyDog = false;
 /*-----------------------------------------
 Elements for HTML 
 ----------------------------------------*/
@@ -44,6 +47,10 @@ const signOutButton = document.querySelector("#signOut");
 const stuffDonationForm = document.querySelector("#stuffDonationForm form");
 
 const statusCircle = document.querySelector(".statusCircle");
+const onlyCatFilter = document.querySelector(".onlyCat");
+const onlyDogFilter = document.querySelector(".onlyDog");
+const followFilter = document.querySelector(".following");
+
 /*-------------------------------------------
 Initialize Firebase
 ------------------------------------------*/
@@ -168,6 +175,34 @@ function addStaticListeners() {
 
   oneTimeDonationForm.addEventListener("submit", onetimeDonation);
   subscribeForm.addEventListener("submit", subscribe);
+
+  followFilter.addEventListener("click", toggleFollowing);
+  function toggleFollowing() {
+    onlyFollow = onlyFollow ? false : true;
+    const allAnimalS = document.querySelectorAll(".eachAnimal");
+    const notFollowingS = document.querySelectorAll(
+      ".eachAnimal:not(.following)"
+    );
+    if (onlyFollow) {
+      showArrayElements(allAnimalS, "inline-block");
+      hideArrayElements(notFollowingS);
+      onlyCat = false;
+      onlyDog = false;
+      followFilter.classList.add("active");
+      onlyCatFilter.classList.remove("active");
+      onlyDogFilter.classList.remove("active");
+    } else {
+      showArrayElements(notFollowingS, "inline-block");
+      followFilter.classList.remove("active");
+    }
+  }
+
+  onlyCatFilter.addEventListener("click", () => {
+    filterAnimalList("cat");
+  });
+  onlyDogFilter.addEventListener("click", () => {
+    filterAnimalList("dog");
+  });
 }
 
 function startUserSession(email) {
@@ -803,6 +838,9 @@ function getUserAnimals(userEmail) {
           getDogs(userEmail);
         } else {
           getAllAnimals(userEmail);
+          // only show filter cat/dog if user set to see both
+          onlyCatFilter.classList.remove("hiddenContent");
+          onlyDogFilter.classList.remove("hiddenContent");
         }
       });
     });
@@ -816,8 +854,6 @@ function getCats(userEmail) {
     });
 }
 function getDogs(userEmail) {
-  console.log("show dog");
-
   db.collection("animals")
     .where("type", "==", "dog")
     .get()
@@ -977,17 +1013,15 @@ function hideArrayElements(array) {
   });
 }
 
-function showArrayElements(array) {
+function showArrayElements(array, display) {
   array.forEach(removeElement => {
-    removeElement.style.display = "block";
+    if (display) {
+      removeElement.style.display = display;
+    } else {
+      removeElement.style.display = "block";
+    }
   });
 }
-
-// function clearElements(array) {
-//   array.forEach(ele => {
-//     ele.textContent = "";
-//   });
-// }
 
 function showElement(ele) {
   ele.classList.add("shownContent");
@@ -1040,12 +1074,47 @@ function showFeedback(form, error, color) {
   }, 1500);
 }
 
+function filterAnimalList(type) {
+  const allAnimal = document.querySelectorAll(`.eachAnimal`);
+  const notMatchingS = document.querySelectorAll(`.eachAnimal:not(.${type})`);
+  if (type === "cat") {
+    onlyCat = onlyCat ? false : true;
+    if (onlyCat) {
+      showArrayElements(allAnimal, "inline-block");
+      hideArrayElements(notMatchingS);
+      onlyCatFilter.classList.add("active");
+      onlyDogFilter.classList.remove("active");
+      followFilter.classList.remove("active");
+      onlyDog = false;
+      onlyFollow = false;
+    } else {
+      onlyCatFilter.classList.remove("active");
+      showArrayElements(notMatchingS, "inline-block");
+    }
+  }
+  if (type === "dog") {
+    onlyDog = onlyDog ? false : true;
+    if (onlyDog) {
+      showArrayElements(allAnimal, "inline-block");
+      hideArrayElements(notMatchingS);
+      onlyDogFilter.classList.add("active");
+      onlyCatFilter.classList.remove("active");
+      onlyCat = false;
+      onlyFollow = false;
+    } else {
+      onlyDogFilter.classList.remove("active");
+      showArrayElements(notMatchingS, "inline-block");
+    }
+  }
+}
+
 function appendEachAnimal(array, userEmail) {
   animalListOnLoggedIn.innerHTML = "";
   array.forEach(entry => {
     const data = entry.data();
     let animalDiv = document.createElement("div");
     animalDiv.classList.add("eachAnimal");
+    animalDiv.classList.add(data.type);
     animalDiv.dataset.id = entry.id;
     let animalName = document.createElement("p");
     animalName.textContent = data.name;
@@ -1083,29 +1152,71 @@ function appendEachAnimal(array, userEmail) {
           if (user.data().following.indexOf(entry.id) > -1) {
             heart.setAttribute("src", "img/icons/filledheart.png");
             heart.setAttribute("alt", "filled heart icon");
+            animalDiv.classList.add("following");
           } else {
             heart.setAttribute("src", "img/icons/emptyheart.png");
             heart.setAttribute("alt", "empty heart icon");
           }
         });
+        heart.addEventListener("click", toggleFollow);
+        function toggleFollow() {
+          const heartType = heart.getAttribute("src");
+          const animalID = entry.id;
+          if (heartType.indexOf("filled") > -1) {
+            heart.setAttribute("src", "img/icons/emptyheart.png");
+            unfollowAnimal(entry.id, user.userEmail);
+          } else {
+            heart.setAttribute("src", "img/icons/filledheart.png");
+            followAnimal(entry.id, user.userEmail);
+          }
+        }
+        function unfollowAnimal(animal, user) {
+          db.collection("member")
+            .where("email", "==", user)
+            .get()
+            .then(res => {
+              res.forEach(user => {
+                db.collection("member")
+                  .doc(user.id)
+                  .update({
+                    following: firebase.firestore.FieldValue.arrayRemove(animal)
+                  });
+              });
+            });
+        }
+        function followAnimal(animal, user) {
+          db.collection("member")
+            .where("email", "==", user)
+            .get()
+            .then(res => {
+              res.forEach(user => {
+                db.collection("member")
+                  .doc(user.id)
+                  .update({
+                    following: firebase.firestore.FieldValue.arrayUnion(animal)
+                  });
+              });
+            });
+        }
       });
     let statusCircle = document.createElement("div");
     statusCircle.classList.add("statusCircle");
     animalDiv.appendChild(animalName);
     animalDiv.appendChild(animalImg);
-    animalDiv.appendChild(heart);
-    animalDiv.appendChild(statusCircle);
-    animalDiv.appendChild(animalArrow);
-    animalDiv.addEventListener("click", e => {
+    animalImg.addEventListener("click", e => {
       // hide side panel if present
       hideElement(userSettingPanel);
       hideElement(newsFeedPanel);
       // show animal modal with triangle pointer
       let arrows = e.target.parentElement.querySelectorAll(".triangleUp");
       hideArrayElements(arrows);
-      e.target.querySelector(".triangleUp").style.display = "inherit";
+      e.target.parentElement.querySelector(".triangleUp").style.display =
+        "inherit";
       getClickedAnimal(entry.id);
     });
+    animalDiv.appendChild(heart);
+    animalDiv.appendChild(statusCircle);
+    animalDiv.appendChild(animalArrow);
     animalListOnLoggedIn.appendChild(animalDiv);
   });
   moveAnimals();

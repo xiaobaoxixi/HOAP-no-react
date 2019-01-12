@@ -830,7 +830,22 @@ button:focus {
     background-color: $grayColor;
     color: grey;
     position: relative;
-
+    & > p > span {
+      margin-left: 20px;
+      img {
+        width: 20px;
+        cursor: pointer;
+        vertical-align: bottom;
+        opacity: 0.3;
+        transition: all 0.2s;
+        &:hover {
+          opacity: 1;
+        }
+        &.active {
+          opacity: 1;
+        }
+      }
+    }
     //display: grid;
     //grid-template-rows: 20vh 1fr;
     hr {
@@ -857,6 +872,7 @@ button:focus {
     }
 
     #animalBox {
+      margin-top: 30px;
       display: grid;
       grid-template-columns: 15px 1fr 15px;
       .animalArrows {
@@ -900,22 +916,23 @@ button:focus {
             > p {
               width: 100%;
               text-align: center;
-              bottom: -15%;
+              bottom: -25%;
             }
             > img:not(.heart) {
               width: 100%;
               height: 100%;
               border-radius: 50%;
+              cursor: pointer;
             }
             .heart {
               width: 15%;
               left: 10%;
-              bottom: -15%;
+              bottom: -25%;
+              cursor: pointer;
             }
-            cursor: pointer;
-            * {
-              pointer-events: none;
-            }
+            // * {
+            //   pointer-events: none;
+            // }
           }
         }
       }
