@@ -1810,11 +1810,10 @@ footer {
                   position: relative;
                   left: -20px;
                   top: -20px;
-
-                  .memberName {
-                    font-size: 13px;
-                    margin-left: 5px; /* temp setting */
-                  }
+                }
+                .memberName {
+                  font-size: 13px;
+                  margin-left: 5px; /* temp setting */
                 }
                 .row:not(:last-of-type):not(.head) {
                   border-bottom: 1px solid #cacaca;

@@ -24,9 +24,15 @@ const membersTamplate = document.querySelector(".membersTemplate").content;
 // date related
 const today = new Date();
 const year = today.getFullYear().toString();
-const month = (today.getMonth() + 1).toString();
-const day = today.getDate().toString();
-const timestamp = today.getTime();
+const month =
+  today.getMonth() + 1 > 9
+    ? (today.getMonth() + 1).toString()
+    : "0" + (today.getMonth() + 1).toString();
+const day =
+  today.getDate() + 1 > 9
+    ? today.getDate().toString()
+    : "0" + (today.getDate() + 1).toString();
+//const timestamp = today.getTime();
 date.textContent = `${year}-${month}-${day}`;
 
 // custom variables
@@ -34,8 +40,6 @@ let filename;
 let file;
 // displayed animal array, use this for update animal list without re-render the whole list AND without using firebases's built-in onchange function
 let animalArray = [];
-
-//window.addEventListener("DOMContentLoaded", displayAnimals);
 
 // GET animals from db and generate animal columns
 function displayAnimals() {
@@ -97,7 +101,6 @@ function buildAnimalColumn(entry) {
     .then(res => {
       res.docs.forEach(doc => {
         if (!doc.data().month && !doc.data().year && !doc.data().day) {
-          console.log(doc.data());
           ///////////////////// need to DRY these
           if (doc.data().morning === false) {
             let row = document.createElement("div");
@@ -234,30 +237,24 @@ function buildAnimalColumn(entry) {
               const afternoon = doc.data().afternoon;
               const evening = doc.data().evening;
               const training = doc.data().training;
-              const matchingAnimal = document.querySelector(
-                `div[data-id="${animalID}"]`
-              );
-              if (morning && matchingAnimal.querySelector(".morningByWhom")) {
-                matchingAnimal.querySelector(
-                  ".morningByWhom"
+              if (morning) {
+                document.querySelector(
+                  `div[data-id="${animalID}"] .morningByWhom`
                 ).textContent = user;
               }
-              if (
-                afternoon &&
-                matchingAnimal.querySelector(".afternoonByWhom")
-              ) {
-                matchingAnimal.querySelector(
-                  ".afternoonByWhom"
+              if (afternoon) {
+                document.querySelector(
+                  `div[data-id="${animalID}"] .afternoonByWhom`
                 ).textContent = user;
               }
-              if (evening && matchingAnimal.querySelector(".eveningByWhom")) {
-                matchingAnimal.querySelector(
-                  ".eveningByWhom"
+              if (evening) {
+                document.querySelector(
+                  `div[data-id="${animalID}"] .eveningByWhom`
                 ).textContent = user;
               }
-              if (training && matchingAnimal.querySelector(".trainingByWhom")) {
-                matchingAnimal.querySelector(
-                  ".trainingByWhom"
+              if (training) {
+                document.querySelector(
+                  `div[data-id="${animalID}"] .trainingByWhom`
                 ).textContent = user;
               }
             });

@@ -1476,10 +1476,10 @@ footer {
                   position: relative;
                   left: -20px;
                   top: -20px; }
-                  #admin main .section .subsection .tableWrapper .columns .column .row img .memberName {
-                    font-size: 13px;
-                    margin-left: 5px;
-                    /* temp setting */ }
+                #admin main .section .subsection .tableWrapper .columns .column .row .memberName {
+                  font-size: 13px;
+                  margin-left: 5px;
+                  /* temp setting */ }
                 #admin main .section .subsection .tableWrapper .columns .column .row .row:not(:last-of-type):not(.head) {
                   border-bottom: 1px solid #cacaca; }
         #admin main .section .subsection .animalDetailModal {
