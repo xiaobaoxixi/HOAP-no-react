@@ -140,16 +140,14 @@ label {
       background-color: #a81c1c;
       border-radius: 50%;
       &.flash {
-        animation: flash 1s ease-out 3;
+        animation: flash 1s ease-out 3 forwards;
       }
       @keyframes flash {
         50% {
           opacity: 0.1;
-          fill: $brownColor;
         }
         100% {
           opacity: 1;
-          fill: $brownColor;
         }
       }
     }

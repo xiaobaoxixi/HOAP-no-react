@@ -111,15 +111,13 @@ label {
       background-color: #a81c1c;
       border-radius: 50%; }
       .navbar #sidebarBtns .statusCircle.flash {
-        animation: flash 1s ease-out 3; }
+        animation: flash 1s ease-out 3 forwards; }
 
 @keyframes flash {
   50% {
-    opacity: 0.1;
-    fill: #c18e63; }
+    opacity: 0.1; }
   100% {
-    opacity: 1;
-    fill: #c18e63; } }
+    opacity: 1; } }
   .navbar .darkBtn {
     font-size: 13px;
     padding: 9px;

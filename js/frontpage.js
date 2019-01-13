@@ -87,19 +87,75 @@ function init() {
 function pickContent() {
   //// with firebase Auth
   firebase.auth().onAuthStateChanged(function(user) {
-    if (user && user.email === "admin@admin.com") {
+    if (user) {
+      db.collection("member")
+        .where("email", "==", user.email)
+        .get()
+        .then(res => {
+          res.docs.forEach(entry => {
+            const permission = entry.data().permission;
+            if (permission === "admin") {
+              // display relevant content when admin is logged in
+              hideArrayElements(frontpageContentS);
+              hideArrayElements(userContentS);
+              showArrayElements(adminContentS);
+              // get relevant user data
+              initAdmin();
+            } else {
+              hideArrayElements(frontpageContentS);
+              hideArrayElements(adminContentS);
+              hideArrayElements(closeByDefaultContents);
+              showArrayElements(userContentS);
+              /*-------------------------
+                live update notification
+                -------------------------*/
+              db.collection("notifications").onSnapshot(snapshot => {
+                console.log("monitor notification for: " + user.email);
+                let changes = snapshot.docChanges();
+                changes.forEach(change => {
+                  if (change.type == "added") {
+                    const changedDoc = change.doc.data();
+                    if (!changedDoc.seenBy.includes(user.email)) {
+                      newsStatus = true;
+                      console.log("new notification added");
+                      toggleElements(statusCircle);
+                      if (!statusCircle.classList.contains("flash")) {
+                        statusCircle.classList.add("flash");
+                        statusCircle.addEventListener("animationend", () => {
+                          statusCircle.classList.remove("flash");
+                        });
+                      }
+                      // by default, new notification doesn't trigger getUserNewsfeed(), it's triggered when user click on the paw
+                      // but if the news panel is already open, need to run getUserNewsfeed(), since user won't click on paw at this state
+                      if (newsFeedPanel.classList.contains("shownContent")) {
+                        console.log("already open");
+                        getUserNewsfeed(
+                          window.sessionStorage.getItem("subscribe")
+                        );
+                        toggleElements(statusCircle);
+                        newsStatus = false;
+                      }
+                    }
+                  }
+                });
+              });
+            }
+          });
+        });
+      /*} else if (user) {
+          if (user && user.email === "admin@admin.com") {
       // display relevant content when admin is logged in
       hideArrayElements(frontpageContentS);
       hideArrayElements(userContentS);
       showArrayElements(adminContentS);
       // get relevant user data
-      displayAnimals();
-    } else if (user) {
+      initAdmin();
+    } */
       // display relevant content for logged in user
-      hideArrayElements(frontpageContentS);
-      hideArrayElements(adminContentS);
-      hideArrayElements(closeByDefaultContents);
-      showArrayElements(userContentS);
+      // hideArrayElements(frontpageContentS);
+      // hideArrayElements(adminContentS);
+      // hideArrayElements(closeByDefaultContents);
+      // showArrayElements(userContentS);
     } else {
       // display relevant content when no user is logged in
       hideArrayElements(adminContentS);
@@ -112,6 +168,7 @@ function pickContent() {
   //// signin and signup will lead to startUserSession
   if (window.sessionStorage.getItem("userEmail")) {
     console.log("from session");
+    hideArrayElements(adminContentS);
     const userEmail = window.sessionStorage.getItem("userEmail");
     const subscribe = window.sessionStorage.getItem("subscribe");
     if (userEmail !== "admin@admin.com") {
@@ -304,6 +361,7 @@ function signout(e, arr) {
       }
       //clearElements(feedbackMsgS);
       scrollToTop();
+      hideArrayElements(adminContentS);
     })
     .catch(function(error) {
       // An error happened.
@@ -1227,7 +1285,7 @@ function appendEachAnimal(array, userEmail) {
       getClickedAnimal(entry.id);
     });
     animalDiv.appendChild(heart);
-    animalDiv.appendChild(statusCircle);
+    //    animalDiv.appendChild(statusCircle);
     animalDiv.appendChild(animalArrow);
     animalListOnLoggedIn.appendChild(animalDiv);
   });
@@ -1240,7 +1298,6 @@ specific display functions
 
 // Click left/right arrow to browse through animals
 function moveAnimals() {
-  console.log("move");
   const leftKey = document.querySelector("#animalArrowLeft");
   const rightKey = document.querySelector("#animalArrowRight");
 
@@ -1259,34 +1316,6 @@ function moveAnimals() {
     document.querySelector("#animalList").appendChild(first);
   });
 }
-
-/*-------------------------
-live update notification
--------------------------*/
-db.collection("notifications").onSnapshot(snapshot => {
-  let changes = snapshot.docChanges();
-  changes.forEach(change => {
-    if (change.type == "added") {
-      const changedDoc = change.doc.data();
-      if (!changedDoc.seenBy.includes(user.userEmail)) {
-        newsStatus = true;
-        toggleElements(statusCircle);
-        if (!statusCircle.classList.contains("flash")) {
-          statusCircle.classList.add("flash");
-          statusCircle.addEventListener("animationend", () => {
-            statusCircle.classList.remove("flash");
-          });
-        }
-        // by default, new notification doesn't trigger getUserNewsfeed(), it's triggered when user click on the paw
-        // but if the news panel is already open, need to run getUserNewsfeed(), since user won't click on paw at this state
-        if (newsFeedPanel.classList.contains("shownContent")) {
-          getUserNewsfeed(user.subscribe);
-          newsStatus = false;
-        }
-      }
-    }
-  });
-});
 
 ///////////// not used yet  ////////////////
 /*-------------------------------------------

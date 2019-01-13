@@ -1,6 +1,71 @@
 "use strict";
+
 let newAnimal = false;
 let loaded = false;
+
+function initAdmin() {
+  displayAnimals();
+
+  /*--------------------------------------
+  Intersection observer on the admin page
+  ---------------------------------------*/
+
+  //get sections from the DOM
+  const dailyTasksSection = document.querySelector(".animalTasks");
+  const toDoListSection = document.querySelector(".otherToDo");
+  const dailyTasksAnchor = document.querySelector("aside ul li:nth-child(1) a");
+  const postAndNotifySection = document.querySelector(".postBtn");
+  const postAndNotifyAnchor = document.querySelector(
+    "aside ul li:nth-child(2) a"
+  );
+  const statusSection = document.querySelector(".listOfDonations");
+  const statusAnchor = document.querySelector("aside ul li:nth-child(3) a");
+
+  let options0 = {
+    root: null,
+    rootMargin: "0px",
+    threshold: 0
+  };
+  let options20 = {
+    root: null,
+    rootMargin: "0px",
+    threshold: 0.2
+  };
+  let observerDailyTasks = new IntersectionObserver(showDailyTask, options0);
+  let observerToDoList = new IntersectionObserver(showDailyTask, options20);
+  let observerPostNotify = new IntersectionObserver(showPostNotify, options20);
+  let observerStatus = new IntersectionObserver(showStatus, options20);
+
+  observerDailyTasks.observe(dailyTasksSection);
+  observerToDoList.observe(toDoListSection);
+  observerPostNotify.observe(postAndNotifySection);
+  observerStatus.observe(statusSection);
+
+  function showDailyTask() {
+    dailyTasksAnchor.classList.add("activeAnchor");
+    postAndNotifyAnchor.classList.remove("activeAnchor");
+    statusAnchor.classList.remove("activeAnchor");
+  }
+  function showPostNotify() {
+    dailyTasksAnchor.classList.remove("activeAnchor");
+    postAndNotifyAnchor.classList.add("activeAnchor");
+    statusAnchor.classList.remove("activeAnchor");
+  }
+  function showStatus() {
+    dailyTasksAnchor.classList.remove("activeAnchor");
+    postAndNotifyAnchor.classList.remove("activeAnchor");
+    statusAnchor.classList.add("activeAnchor");
+    if (newAnimal) {
+      calcAnimalCost();
+      countAnimals();
+    }
+    if (!loaded) {
+      calcAnimalCost();
+      countAnimals();
+      getMemberStatus();
+    }
+  }
+}
 
 // html elements
 const addAnimalBtn = document.querySelector(".addAnimalBtn");
@@ -346,6 +411,7 @@ function getAnimalInfo(id) {
 
 // edit animal detail
 editAnimalBtn.addEventListener("click", e => {
+  newAnimal = true;
   e.stopPropagation();
   let id = e.target.parentElement.parentElement.getAttribute("data-id");
   db.collection("animals")
@@ -392,6 +458,7 @@ editAnimalBtn.addEventListener("click", e => {
 
 // delete animal
 deleteAnimalBtn.addEventListener("click", e => {
+  newAnimal = true;
   e.stopPropagation();
   let id = e.target.parentElement.parentElement.getAttribute("data-id");
   db.collection("animals")
@@ -424,7 +491,6 @@ function showAnimalDetail(data, id, elem, editableBol) {
   // if (editableBol === true) {
   // }
   bigImage.setAttribute("src", src);
-  console.log(bigImage);
   elem.querySelector(".animalImageBig").appendChild(bigImage);
   // display newly fetched values
   elem.querySelector(".animalName").value = data.name;
@@ -865,65 +931,6 @@ function countAnimals() {
           }
         });
     });
-}
-/*--------------------------------------
-Intersection observer on the admin page
--------------------------------------*/
-
-//get sections from the DOM
-const dailyTasksSection = document.querySelector(".animalTasks");
-const toDoListSection = document.querySelector(".otherToDo");
-const dailyTasksAnchor = document.querySelector("aside ul li:nth-child(1) a");
-const postAndNotifySection = document.querySelector(".postBtn");
-const postAndNotifyAnchor = document.querySelector(
-  "aside ul li:nth-child(2) a"
-);
-const statusSection = document.querySelector(".listOfDonations");
-const statusAnchor = document.querySelector("aside ul li:nth-child(3) a");
-
-let options0 = {
-  root: null,
-  rootMargin: "0px",
-  threshold: 0
-};
-let options20 = {
-  root: null,
-  rootMargin: "0px",
-  threshold: 0.2
-};
-let observerDailyTasks = new IntersectionObserver(showDailyTask, options0);
-let observerToDoList = new IntersectionObserver(showDailyTask, options20);
-let observerPostNotify = new IntersectionObserver(showPostNotify, options20);
-let observerStatus = new IntersectionObserver(showStatus, options20);
-
-observerDailyTasks.observe(dailyTasksSection);
-observerToDoList.observe(toDoListSection);
-observerPostNotify.observe(postAndNotifySection);
-observerStatus.observe(statusSection);
-
-function showDailyTask() {
-  dailyTasksAnchor.classList.add("activeAnchor");
-  postAndNotifyAnchor.classList.remove("activeAnchor");
-  statusAnchor.classList.remove("activeAnchor");
-}
-function showPostNotify() {
-  dailyTasksAnchor.classList.remove("activeAnchor");
-  postAndNotifyAnchor.classList.add("activeAnchor");
-  statusAnchor.classList.remove("activeAnchor");
-}
-function showStatus() {
-  dailyTasksAnchor.classList.remove("activeAnchor");
-  postAndNotifyAnchor.classList.remove("activeAnchor");
-  statusAnchor.classList.add("activeAnchor");
-  if (newAnimal) {
-    calcAnimalCost();
-    countAnimals();
-  }
-  if (!loaded) {
-    calcAnimalCost();
-    countAnimals();
-    getMemberStatus();
-  }
 }
 
 /*-------------------------------------------
