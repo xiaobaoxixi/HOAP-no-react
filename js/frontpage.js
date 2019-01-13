@@ -126,6 +126,9 @@ function pickContent() {
                           statusCircle.classList.remove("flash");
                         });
                       }
+                      setTimeout(() => {
+                        statusCircle.classList.remove("flash");
+                      }, 5000);
                       // by default, new notification doesn't trigger getUserNewsfeed(), it's triggered when user click on the paw
                       // but if the news panel is already open, need to run getUserNewsfeed(), since user won't click on paw at this state
                       if (newsFeedPanel.classList.contains("shownContent")) {
