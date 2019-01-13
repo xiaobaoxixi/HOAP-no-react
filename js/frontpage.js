@@ -267,7 +267,6 @@ function addStaticListeners() {
 
 function startUserSession(email) {
   console.log("start session");
-  console.log(email);
   user.userEmail = email;
   db.collection("member")
     .where("email", "==", email)
@@ -378,14 +377,12 @@ function preferenceSetting(email) {
   const skipPrefBtn = document.querySelector("#skipPrefBtn");
 
   preferenceForm.addEventListener("submit", e => {
-    console.log(email);
     sendPreferenceToDatabase(e, email);
   });
   skipPrefBtn.addEventListener("click", e => {
     if (preferenceForm.nickname.value) {
       sendPreferenceToDatabase(e, email);
     } else {
-      console.log(document.querySelector("#modalTop"));
       showFeedback(
         document.querySelector("#modalTop"),
         "At least let us know your nickname~",
@@ -437,6 +434,7 @@ function sendPreferenceToDatabase(e, email) {
       following: []
     })
     .then(() => {
+      pickContent();
       startUserSession(email);
       // window.sessionStorage.setItem("userEmail", email);
       // resetForm(userSettingForm);
@@ -1242,6 +1240,10 @@ function appendEachAnimal(array, userEmail) {
           }
         }
         function unfollowAnimal(animal, user) {
+          document
+            .querySelector(`.eachAnimal[data-id=${animal}]`)
+            .classList.remove("following");
+
           db.collection("member")
             .where("email", "==", user)
             .get()
@@ -1256,6 +1258,9 @@ function appendEachAnimal(array, userEmail) {
             });
         }
         function followAnimal(animal, user) {
+          document
+            .querySelector(`.eachAnimal[data-id=${animal}]`)
+            .classList.add("following");
           db.collection("member")
             .where("email", "==", user)
             .get()
