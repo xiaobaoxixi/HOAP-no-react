@@ -116,7 +116,10 @@ function pickContent() {
                 changes.forEach(change => {
                   if (change.type == "added") {
                     const changedDoc = change.doc.data();
-                    if (!changedDoc.seenBy.includes(user.email)) {
+                    if (
+                      changedDoc.seenBy &&
+                      !changedDoc.seenBy.includes(user.email)
+                    ) {
                       newsStatus = true;
                       console.log("new notification added");
                       toggleElements(statusCircle);
