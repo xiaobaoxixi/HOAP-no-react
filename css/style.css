@@ -858,6 +858,9 @@ button:focus {
         padding-bottom: 30px; }
         #signedInContent #petExpand .memberDonation #donationFormLogginIn .timeSlots p {
           padding: 10px 20px 0 10px; }
+      #signedInContent #petExpand .memberDonation #donationFormLogginIn input {
+        border: none;
+        border-bottom: 1px solid #716f6f; }
       #signedInContent #petExpand .memberDonation #donationFormLogginIn #donationBtn {
         font-size: 13px;
         font-family: "Raleway", sans-serif;

@@ -1016,6 +1016,10 @@ button:focus {
             padding: 10px 20px 0 10px;
           }
         }
+        input {
+          border: none;
+          border-bottom: 1px solid #716f6f;
+        }
         #donationBtn {
           font-size: 13px;
           font-family: "Raleway", sans-serif;
