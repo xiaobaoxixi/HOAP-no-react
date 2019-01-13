@@ -76,6 +76,7 @@ let storageReference = storage.ref();
 /*-------------------------------------------
 Start
 ------------------------------------------*/
+hideArrayElements(adminContentS);
 window.addEventListener("DOMContentLoaded", init);
 function init() {
   // Display right content based on if user is logged in and if user is admin
