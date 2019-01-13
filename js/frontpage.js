@@ -878,8 +878,8 @@ function getUserNewsfeed(subscribe) {
             p.addEventListener("click", markRead);
             newsFeedContent.appendChild(p);
           }
+          newsStatus = false;
         });
-        newsStatus = false;
       });
   });
 }
