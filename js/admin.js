@@ -319,7 +319,12 @@ function buildAnimalColumn(entry) {
                   `div[data-id="${animalID}"] .eveningByWhom`
                 ).textContent = user;
               }
-              if (training) {
+              if (
+                training &&
+                document.querySelector(
+                  `div[data-id="${animalID}"] .trainingByWhom`
+                )
+              ) {
                 document.querySelector(
                   `div[data-id="${animalID}"] .trainingByWhom`
                 ).textContent = user;
@@ -412,7 +417,7 @@ function getAnimalInfo(id) {
 // edit animal detail
 editAnimalBtn.addEventListener("click", e => {
   newAnimal = true;
-  e.stopPropagation();
+  //  e.stopPropagation();
   let id = e.target.parentElement.parentElement.getAttribute("data-id");
   db.collection("animals")
     .doc(id)
@@ -459,7 +464,7 @@ editAnimalBtn.addEventListener("click", e => {
 // delete animal
 deleteAnimalBtn.addEventListener("click", e => {
   newAnimal = true;
-  e.stopPropagation();
+  //  e.stopPropagation();
   let id = e.target.parentElement.parentElement.getAttribute("data-id");
   db.collection("animals")
     .doc(id)
@@ -957,7 +962,7 @@ function renderTask(doc) {
   //deleting/completing tasks
 
   taskCheckbox.addEventListener("click", e => {
-    e.stopPropagation();
+    //e.stopPropagation();
     let id = e.target.parentElement.getAttribute("data-id");
     db.collection("toDoList")
       .doc(id)
